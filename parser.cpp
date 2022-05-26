@@ -2,22 +2,25 @@
 #include <iostream>
 #include <filesystem>
 #include "classes.cpp"
-#ifndef _GLIBCXX_STRING
 #include <string>
-#endif
+#include <vector>
 
 int main() {
+    std::vector<char> filebuffer;
     std::string filename;
 
     std::cin >> filename;
-    int k = std::filesystem::file_size(filename);
+    // int k = std::filesystem::file_size(filename);
 
     std::ifstream f(filename);
-    char* filebuffer = new char[k];
+    int k = 0;
+    // char* filebuffer = new char[k];
     
-    for (int i = 0; i < k; i++){
-        filebuffer[i] = f.get();
+    for (int i = 0; !(f.eof()); i++){
+        filebuffer.reserve(i + 2);
+        filebuffer.push_back(f.get());
         std::cout << filebuffer[i];
+        k = i;
     }
 
     std::cout << "\n\n";
@@ -29,37 +32,37 @@ int main() {
 
     for (int i = 0; i < k; i++){
         if (filebuffer[i] == '+'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == '-'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == '*'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == '%'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == '='){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == ','){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == '>'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             if (filebuffer[j + 1] == '='){
                 tokens[j].size += 1;
                 i += 1;
@@ -68,7 +71,7 @@ int main() {
             continue;
 
         } else if (filebuffer[i] == '<'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             if (filebuffer[j + 1] == '='){
                 tokens[j].size += 1;
                 i += 1;
@@ -80,22 +83,22 @@ int main() {
             continue;
 
         } else if (filebuffer[i] == '\''){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == '\"'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == '('){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
         } else if (filebuffer[i] == ')'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
@@ -113,7 +116,7 @@ int main() {
             continue;
 
         } else if (filebuffer[i] == '/'){
-            tokens[j].ptr = filebuffer + i;
+            tokens[j].ptr = &filebuffer[i];
             j += 1;
             continue;
 
@@ -126,4 +129,6 @@ int main() {
     }
 
     std::cout << j;
+
+    delete[] tokens;
 }
