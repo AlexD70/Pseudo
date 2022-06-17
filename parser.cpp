@@ -53,7 +53,7 @@ namespace pflags {
 class PseudocodeParser {
     public:
         PseudocodeParser() {}
-        std::vector<char> charBuffer;
+        std::vector<char> charBuffer = std::vector<char>();
 
         /**
          * @b readFile public method
@@ -77,6 +77,7 @@ class PseudocodeParser {
                 }
             }
 
+            f.close();
             return;
         }
 
@@ -155,11 +156,14 @@ int main()
     T.setReprOnce("Hello World");
     M.setReprOnce("Taylor Swift");
 
-    TokenHolder<Token> TkH = Token::globalTokenHolder;
-    TkH.pushBack(T);
-    TkH.pushBack(M);
+    //TokenHolder<Token> TkH = Token::globalTokenHolder;
+    std::vector<Token> TkH = std::vector<Token>();
+    TkH.reserve(2);
+    TkH.push_back(T);
+    TkH.push_back(M);
 
-    std::cout << TkH.internalArray[0].strRepr();
+    std::cout << TkH[0].strRepr() << '\n';
+    std::cout << TkH[1].strRepr() << '\n';
 
     /*
     int I[3] = {1, 2, 3};
