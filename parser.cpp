@@ -1,8 +1,10 @@
 #include <fstream>
-#include "classes.cpp"
+#include <iostream>
+//#include "classes.cpp"
 //#include "debuglib.cpp"
-#include "pseerrorslib.cpp"
+//#include "pseerrorslib.cpp"
 #include <vector>
+#include "pseinternal.cpp"
 
 /**
  * @b pflags namespace
@@ -39,7 +41,7 @@ namespace pflags {
  * 
  * @c public methods
  *     @li @c readFile(std::string) void
- *     @li @c parseFromBuffer() void
+ *     @li @c parseFromBuffer(std::vector<char>s) void
  * 
  * @c private fields
  *     @li @c peekData char
@@ -78,7 +80,9 @@ class PseudocodeParser {
             return;
         }
 
-        void parseFromBuffer(){}
+        void parseFromBuffer(std::vector<char> buffer) {
+
+        }
 
     private:
         char peekData;
@@ -145,11 +149,17 @@ class PseudocodeParser {
 
 int main()
 {
-    PseudocodeParser P;
-    P.readFile("pseudo.txt");
 
-    Throwable T("HULLO");
-    pseutils::_throw(T);
+    Token T = Token();
+    Token M = Token();
+    T.setReprOnce("Hello World");
+    M.setReprOnce("Taylor Swift");
+
+    TokenHolder<Token> TkH = Token::globalTokenHolder;
+    TkH.pushBack(T);
+    TkH.pushBack(M);
+
+    std::cout << TkH.internalArray[0].strRepr();
 
     /*
     int I[3] = {1, 2, 3};

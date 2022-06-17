@@ -2,6 +2,8 @@
 #include <string>
 #include <iostream>
 
+#ifndef PSEERR_BASIC
+#define PSERR_BASIC
 class Throwable : public std::exception{
     public:
         Throwable(std::string message, bool reqTermination) {
@@ -45,16 +47,21 @@ class Throwable : public std::exception{
         bool reqTermination = false;
 };
 
+#endif
+
+#ifndef PSE_UTILS
+#define PSE_UTILS
 
 namespace pseutils{
-    void _throw(Throwable T){
+    void raise(Throwable T){
         std::cout << T.what() << '\n';
 
         if (T.terminate()){
-            exit(-1);
+            
         }
 
         return;
     }
 };
 
+#endif
