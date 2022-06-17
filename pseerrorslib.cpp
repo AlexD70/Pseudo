@@ -51,7 +51,7 @@ namespace pseutils{
         std::cout << T.what() << '\n';
 
         if (T.terminate()){
-            throw T;
+            exit(-1);
         }
 
         return;

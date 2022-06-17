@@ -4,6 +4,7 @@
         "fstream": "cpp",
         "*.tcc": "cpp",
         "new": "cpp",
-        "stdexcept": "cpp"
+        "stdexcept": "cpp",
+        "iosfwd": "cpp"
     }
 }
