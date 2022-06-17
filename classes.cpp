@@ -1,31 +1,33 @@
 #include <string>
 
 enum TokenType{
-    WHITESPACE,             //lasa-l ca poate ne ajuta mai trz
-    IDENTIFIER,             //asta va fi string initial
-    INTEGER,                //0 1 2 3 4 5 6 7 8 9 
-    STRING,                 //kdjgfkd   
-    OPERATOR,               //+ - / % * = < > <= >= 
-    SEPARATOR,              //,
-    PARANTHESES,            // ()
-    INDENTATION,            // \n tab (\n 4 spaces) 
-    VALUE_ASSIGNEMENT,      //<-
-    KEYWORD,
-    OPERATOR__,             //special wrapping for -
-    SUBSCRIPT,              // []
-    DEFAULT
+    WHITESPACE,             //0
+    IDENTIFIER,             //1
+    INTEGER,                //2 
+    STRING,                 //3   
+    OPERATOR,               //4 
+    SEPARATOR,              //5
+    PARANTHESES,            //6 
+    INDENTATION,            //7  
+    VALUE_ASSIGNEMENT,      //8
+    KEYWORD,                //9
+    OPERATOR__,             //10; special wrapper for -
+    SUBSCRIPT,              //11
+    DEFAULT                 //12
 };
 
 class Token{
     public:
-        char* ptr;
+        Token(){}
+
+        char* firstChr;
         int size = 0; //size = real_size - 1
         enum TokenType tokenType;
         std::string self = "";
 
         void buildString(){
             for (int i = 0; i <= size; i++){
-			    self.push_back(*(ptr + i));
+			    self.push_back(*(firstChr + i));
 			}
         }
 
