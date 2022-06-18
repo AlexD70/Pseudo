@@ -150,28 +150,7 @@ class PseudocodeParser {
 
 int main()
 {
+    dtypes::Integer a = dtypes::Integer("-0"), b = dtypes::Integer(628);
 
-    Token T = Token();
-    Token M = Token();
-    T.setReprOnce("Hello World");
-    M.setReprOnce("Taylor Swift");
-
-    //TokenHolder<Token> TkH = Token::globalTokenHolder;
-    std::vector<Token> TkH = std::vector<Token>();
-    TkH.reserve(2);
-    TkH.push_back(T);
-    TkH.push_back(M);
-
-    std::cout << TkH[0].strRepr() << '\n';
-    std::cout << TkH[1].strRepr() << '\n';
-
-    /*
-    int I[3] = {1, 2, 3};
-    std::string S[3] = {"I <3 U", "CUPCAKKE", "I SAVE DICK BY GIVING IT CPR"};
-    T.buildStackTrace("ArithmeticException", I, S, 3);
-    */
-
-    //pseutils::_throw(T);
-
-    // prtCharVector(P.charBuffer);
+    std::cout << (a * b).__repr__() << '\n';
 }

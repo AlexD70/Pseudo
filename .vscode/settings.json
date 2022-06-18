@@ -5,6 +5,7 @@
         "*.tcc": "cpp",
         "new": "cpp",
         "stdexcept": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "vector": "cpp"
     }
 }
