@@ -60,7 +60,6 @@ class PseudocodeParser {
          * @param filename
          * @returns void
          */
-
         void readFile(std::string filename) {
             char ch;
             std::ifstream f(filename);
@@ -142,7 +141,6 @@ class PseudocodeParser {
          * @param pos 
          * @returns void
          */
-
         void peek(int pos) {
             peekData = charBuffer[pos + 1];
         }
@@ -150,7 +148,9 @@ class PseudocodeParser {
 
 int main()
 {
-    dtypes::Integer a = dtypes::Integer("-0"), b = dtypes::Integer(628);
+    dtypes::Integer a = dtypes::Integer(5), b = dtypes::Integer(2);
 
-    std::cout << (a * b).__repr__() << '\n';
+    std::cout << (a / b).__repr__() << '\n';
+
+    std::cout << 5.0 * (1.0 /2.0) << '\n';
 }

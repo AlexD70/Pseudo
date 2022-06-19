@@ -1,0 +1,4 @@
+.vscode/
+parser
+!parser.cpp
+pseudo.txt

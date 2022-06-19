@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <iostream>
 
 #ifndef PSE_TOKENS_BASIC
 #define PSE_TOKENS_BASIC
@@ -10,6 +11,8 @@ i wonder how tf i wrote it but it works so im not questioning it
 so i advise u not to question it as well
 unless i did some major bad practice
 also we wont talk abt how i wanted to write: #define elif else if
+
+SEND HELP
 */
 
 class Token {
@@ -70,6 +73,12 @@ namespace dtypes{
             bool Inf = false;
             bool MinusInf = false;
 
+            void setFlags(bool inf = false, bool minusinf = false, bool nan = false){
+                Inf = inf;
+                MinusInf = minusinf;
+                NaN = nan;
+            }
+
             template <class T>
             bool isZero(T number){
                 //dont question it just trust my methods
@@ -77,7 +86,7 @@ namespace dtypes{
             }
 
             template <class T>
-            T add(T& j, T& i){
+            T add(T j, T i){
                 T result = T(0);
 
                 if (j.isNaN() || i.isNaN()){
@@ -137,7 +146,7 @@ namespace dtypes{
             }
 
             template <class T>
-            T mlt(T& j, T& i){
+            T mlt(T j, T i){
                 // this function is extremely unorthodox
                 // it kind of reminds me of jiafei products for some reason
                 int sgn = sign(j) * sign(i);
@@ -157,25 +166,42 @@ namespace dtypes{
                 return T(0);
             }
 
+            template <class T2>
+            T2 revertFraction(T2 number){
+                if(isZero(number)){
+                    return T2("NaN");
+                } else {
+                    std::cout << "reverted: " << 1/number.getVal() << "\nresult: ";
+                    return T2(1.0 / (float) number.getVal());
+                }
+            }
+
+            template <class T2>
+            T2 div(T2 j, T2 i){
+                if (isZero(j)){
+                    return T2(0);
+                } else {
+                    return mlt(j, revertFraction(i));
+                }
+            }
+
             //for your sanity just dont read the division
             // NO LITERALLY ITS EXTREMELY CRAZY
             template <class T1, class T2>
-            T2 div(T1& j, T1& i){
+            T2 div(T1 j, T1 i){
                 //this is getting a bit out of hand
-                return div<T2>(T2(j.__repr__()), T2(i.__repr__()));
+                T2 a = T2(j.__repr__()), b = T2(i.__repr__());
+                std::cout << a.getVal() << ' ' << b.getVal() << '\n';
+                return div<T2>(a, b);
             } 
 
             template <class T1, class T2>
-            T2 div(T1& j, T2& i){
+            T2 div(T1 j, T2 i){
                 // no i am not ok
                 return div<T2>(T2(j.__repr__()), i);
             }
 
-            template <class T2>
-            T2 div(T2& j, T2& i){
-
-            }
-
+            
         public:
             bool isNaN() {
                 return NaN;
@@ -190,18 +216,109 @@ namespace dtypes{
             }
     };
 
+    
+    class Natural{};
+
+    class Float : public Number{
+        private:
+            float val = 0;
+
+            bool strToFloat(std::string str){
+                bool isFloat = true;
+                int i = 0, __i = 0;
+                bool periodFound = false;
+                bool fractionLineFound = false;
+
+                for (char e : str){
+                    if (isdigit(e)){
+                        i++;
+                        continue;
+                    } else if (e == '.' && !periodFound && !fractionLineFound){
+                        i++;
+                        periodFound = true;
+                        continue;
+                    } else if (e == '/' && !fractionLineFound && !periodFound){
+                        if (i == 0){
+                            isFloat = false;
+                            break;
+                        }
+                        i++;
+                        __i = i;
+                        fractionLineFound = true;
+                        continue;
+                    } else {
+                        isFloat = false;
+                        break;
+                    }
+                }
+
+                if (isFloat) {
+                    if (!fractionLineFound){
+                        val = std::stof(str);
+                    } else {
+                        float temp = std::stof(str.substr(__i));
+                        if (temp == 0){
+                            return false;
+                        }
+                        val = std::stof(str.substr(0, __i - 1)) / temp;
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+        public:
+            float getVal() {
+                return val;
+            }
+
+            Float(float _val){
+                val = _val;
+            }
+
+            // Float(int val){
+            //     val = (float) val;
+            // }
+
+            Float(std::string str){
+                if (str == "NaN"){
+                    NaN = true;
+                } else if (str == "Inf"){
+                    Inf = true;
+                } else if (str == "-Inf"){
+                    MinusInf = true;
+                } else if(!strToFloat(str)){
+                    NaN = true;
+                }
+            }
+
+            std::string __repr__(){
+                if (NaN) {
+                    return "NaN";
+                } else if (Inf) {
+                    return "Inf";
+                } else if (MinusInf) {
+                    return "-Inf";
+                } else {
+                    return std::to_string(val);
+                }
+            }
+    };
+
     class Integer : public Number{
         private:
             int val = 0;
 
             bool strToInt(std::string str){
                 bool isInt = true;
-                int i = 0;
+                bool i = true;
 
                 for (char e : str){
-                    if (i == 0){
+                    if (i){
                         if (!( ( e == '-' ) || ( isdigit(e) ) )){
                             isInt = false;
+                            i = false;
                             break;
                         }
                     } else if (!isdigit(e)){
@@ -217,12 +334,6 @@ namespace dtypes{
                 } else {
                     return false;
                 }
-            }
-
-            void setFlags(bool inf = false, bool minusinf = false, bool nan = false){
-                Inf = inf;
-                MinusInf = minusinf;
-                NaN = nan;
             }
 
         public:
@@ -266,12 +377,9 @@ namespace dtypes{
                     Inf = true;
                 } else if (str == "-Inf"){
                     MinusInf = true;
-                } else {
-                    if(!strToInt(str)){
+                } else if(!strToInt(str)){
                         NaN = true;
-                    }
                 }
-
             }
 
             std::string __repr__(){
@@ -310,11 +418,10 @@ namespace dtypes{
             }
 
             Integer operator/ (Integer& i){
-                return Integer(0);
+                return Integer((int) div<Integer, Float>(*this, i).getVal() );
             }
     };
-    class Natural{};
-    class Float{};
+
     class String{};
 };
 
