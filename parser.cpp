@@ -23,8 +23,6 @@ namespace pflags {
 
     stringFlags stringFlagsImpl;
     bool scopeChangeContext = false;
-    int trailingZeros = 0;
-    int startingZeros = 0;
     int paranthesesDepth = 0;
     int scopeDepth = 0;
     int sucessiveSpaces = 0;
@@ -54,6 +52,7 @@ class PseudocodeParser {
     public:
         PseudocodeParser() {}
         std::vector<char> charBuffer = std::vector<char>();
+        std::vector<Token> tokenVector = std::vector<Token>();
 
         /**
          * @b readFile public method
@@ -80,12 +79,61 @@ class PseudocodeParser {
             return;
         }
 
-        void parseFromBuffer(std::vector<char> buffer) {
+        void parseFromBuffer() {
+            parseFromBuffer(charBuffer);
+        }
 
+        void parseFromBuffer(std::vector<char> buffer) {
+            for (int i = 0; i < buffer.size(); i ++){
+                char c = buffer[i];
+
+                if (c == '/'){
+                    if (buffer[i + 1] == '/'){
+                        i += 1;
+                        do{
+                            i += 1;
+                        } while ((i < buffer.size()) && (buffer[i] != '\n'));
+                        pflags::line += 1;
+                    } else if (buffer[i + 1] == '*'){
+                        i += 1;
+                        do{
+                            i += 1;
+                            if (buffer[i] == '\n'){
+                                pflags::line += 1;
+                            }
+                        } while((i < buffer.size()) && (buffer[i] != '*') && (buffer[i + 1] != '/'));
+                    }
+                }
+
+                if ((c == '+') || (c == '*') || (c == '%')){
+                    tokenVector.reserve(tokenVector.size() + 1);
+                    char arr[2] = {c, '\0'};
+                    tokenVector.push_back(Token(pflags::line, arr));
+                }
+
+
+            }
         }
 
     private:
         char peekData;
+
+        std::string buildToken(int *i, std::vector<char> buffer){
+            std::string result = "";
+            char c;
+            do{
+                c = buffer[*i];
+                result.push_back(c);
+                if (c == pflags::stringFlagsImpl.stringType){
+                    pflags::stringFlagsImpl.inString = false;
+                }
+                peek(*i, buffer);
+                *i += 1;
+            } while ((pflags::stringFlagsImpl.inString) ||
+                     ((peekData != ' ') && (peekData != '\t') && (peekData != '\n')));
+
+            return result;
+        }
 
         /**
          * @b seek private method
@@ -98,9 +146,9 @@ class PseudocodeParser {
          * @param i 
          * @returns void
          */
-        void seek(int *i) {
+        void seek(int *i, std::vector<char> buffer) {
             while (true) {
-                peek(*i);
+                peek(*i, buffer);
 
                 if (peekData == ' ') {
                     *i += 1;
@@ -141,8 +189,8 @@ class PseudocodeParser {
          * @param pos 
          * @returns void
          */
-        void peek(int pos) {
-            peekData = charBuffer[pos + 1];
+        void peek(int pos, std::vector<char> buffer) {
+            peekData = buffer[pos + 1];
         }
 };
 
@@ -150,7 +198,5 @@ int main()
 {
     dtypes::Integer a = dtypes::Integer(5), b = dtypes::Integer(2);
 
-    std::cout << (a / b).__repr__() << '\n';
-
-    std::cout << 5.0 * (1.0 /2.0) << '\n';
+    std::cout << ((-9) % 2) << '\n';
 }

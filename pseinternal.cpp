@@ -25,40 +25,30 @@ class Token {
         Token(int line){
             line = line;
         }
+        Token(int line, std::string repr){
+            line = line;
+            __repr__ = repr;
+        }
+        Token(int line, const char* repr){
+            line = line;
+            __repr__ = std::string(repr);
+        }
         
         std::string strRepr(){
             return __repr__;
         }
-
-        void setReprOnce(std::string str) { //std::strings
-            if (__repr__ != ""){
-                return;
-            } else {
-                __repr__ = str;
-            }
-        }    
-
-        void setReprOnce(std::vector<char> str){ //char std::vectors
-            if (__repr__ != ""){
-                return;
-            } else {
-                for (char e : str){
-                    __repr__ += e;
-                }
-            }   
-        }
-
-        void setReprOnce(const char* str, int len){ //c-style strings
-            if (__repr__ != ""){
-                return;
-            } else {
-                for (int i = 0; i < len; i++){
-                    __repr__ += str[i];
-                }
-            }
-        }
 };
 
+class Scope {
+    public:
+    int depth = 0;
+
+    Scope(){}
+
+    Scope(int n){
+        depth = n;
+    }
+};
 
 #endif
 
@@ -166,23 +156,33 @@ namespace dtypes{
                 return T(0);
             }
 
-            template <class T2>
-            T2 revertFraction(T2 number){
-                if(isZero(number)){
-                    return T2("NaN");
-                } else {
-                    std::cout << "reverted: " << 1/number.getVal() << "\nresult: ";
-                    return T2(1.0 / (float) number.getVal());
-                }
-            }
+            // template <class T2>
+            // T2 revertFraction(T2 number){
+            //     if(isZero(number)){
+            //         return T2("NaN");
+            //     } else {
+            //         std::cout << "reverted: " << 1/number.getVal() << "\nresult: ";
+            //         return T2(1.0 / (float) number.getVal());
+            //     }
+            // }
 
             template <class T2>
             T2 div(T2 j, T2 i){
-                if (isZero(j)){
-                    return T2(0);
+                int sgn = sign(j) * sign(i);
+
+                if ((sgn > 1) || (sgn < -1)){
+                    return T2("NaN");
+                } else if ((j.isInf()) || (j.isMinusInf()) || (i.isInf()) || (i.isMinusInf())){
+                    if (sgn == -1) {
+                        return T2("-Inf");
+                    } else if (sgn == 1) {
+                        return T2("Inf");
+                    }
                 } else {
-                    return mlt(j, revertFraction(i));
+                    return T2(j.getVal() / i.getVal());
                 }
+
+                return T2(0);
             }
 
             //for your sanity just dont read the division
@@ -419,6 +419,24 @@ namespace dtypes{
 
             Integer operator/ (Integer& i){
                 return Integer((int) div<Integer, Float>(*this, i).getVal() );
+            }
+
+            Integer operator% (Integer& i){
+                int val = (*this).getVal(), div = i.getVal();
+                bool isNegative = false;
+
+                if (val < 0){
+                    isNegative = true;
+                    val = -val;
+                }
+                while (val >= div){
+                    val -= div;
+                }
+                if (isNegative){
+                    val = -val;
+                }
+
+                return Integer(val);
             }
     };
 
