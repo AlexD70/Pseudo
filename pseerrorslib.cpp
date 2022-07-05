@@ -49,15 +49,43 @@ class Throwable : public std::exception{
 
 #endif
 
+#ifndef PSE_PARSE_ERR
+#define PSE_PARSE_ERR
+
+class UnexpectedEOF : public Throwable{
+    public:
+        UnexpectedEOF(UnexpectedEOF &err) : Throwable(err){}
+        UnexpectedEOF() : Throwable("UnexpectedEOF: raised while parsing.", true){}
+        UnexpectedEOF(std::string message) : Throwable(message, true){}
+};
+
+class InvalidEscape : public Throwable{
+    public:
+        std::string buildStackTrace(int line, std::string escape){
+            return ("InvalidEscape: " + escape + " at line " + std::to_string(line) + ".");
+        }
+
+        InvalidEscape(InvalidEscape &err) : Throwable(err){}
+        InvalidEscape(std::string message) : Throwable(message, true){}
+        InvalidEscape(int line, std::string escape) : Throwable(buildStackTrace(line, escape), true){}
+};
+
+class InvalidString : public Throwable{
+    public:
+        InvalidString(int line) : Throwable("InvalidString: at line " + std::to_string(line), true){}
+};
+
+#endif
+
 #ifndef PSE_UTILS
 #define PSE_UTILS
 
 namespace pseutils{
-    void raise(Throwable T){
+    void raise(Throwable &T){
         std::cout << T.what() << '\n';
 
         if (T.terminate()){
-            
+            //idk what to do here probably a goto or setting a bool flag to true/false
         }
 
         return;

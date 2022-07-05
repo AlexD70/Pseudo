@@ -1,0 +1,4 @@
+add comments 
+build basic parser
+build token wrapper and token types + errors + warnings
+build context validator and dtypes + errors + warnings

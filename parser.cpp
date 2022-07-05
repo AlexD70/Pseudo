@@ -2,7 +2,7 @@
 #include <iostream>
 //#include "classes.cpp"
 //#include "debuglib.cpp"
-//#include "pseerrorslib.cpp"
+#include "pseerrorslib.cpp"
 #include <vector>
 #include "pseinternal.cpp"
 
@@ -50,7 +50,7 @@ namespace pflags {
  */
 class PseudocodeParser {
     public:
-        PseudocodeParser() {}
+        PseudocodeParser(){}
         std::vector<char> charBuffer = std::vector<char>();
         std::vector<Token> tokenVector = std::vector<Token>();
 
@@ -84,8 +84,69 @@ class PseudocodeParser {
         }
 
         void parseFromBuffer(std::vector<char> buffer) {
+            resetFlags();
+            std::string tokenString = "";
+            int otherData = 0;
+
             for (int i = 0; i < buffer.size(); i ++){
                 char c = buffer[i];
+
+                if (pflags::stringFlagsImpl.inString) {
+                    if (c == '\\'){
+                        peek(i, buffer);
+                        if (peekData == '\\'){
+                            i += 1;
+                            tokenString = tokenString + '\\';
+                        } else if (peekData == 'n'){
+                            i += 1;
+                            tokenString = tokenString + '\n';
+                        } else if (peekData == 't'){
+                            i += 1;
+                            tokenString + '\t';
+                        } else if (peekData == 'b'){
+                            i += 1;
+                            tokenString = tokenString + '\b';
+                        } else if (peekData == '\"'){
+                            i += 1;
+                            tokenString = tokenString + '\"';
+                        } else if (peekData == '\''){
+                            i += 1;
+                            tokenString = tokenString + '\'';
+                        } else if (peekData == '\n'){
+                            pflags::line += 1;
+                            i += 1;
+                            otherData += 1;
+                        } else {
+                            InvalidEscape err = InvalidEscape(pflags::line, std::string() + c + peekData);
+                            pseutils::raise(err);
+                        }
+                    } else if ((c == '\n') || (iscntrl(c)) || !(isascii(c))){
+                        InvalidString err = InvalidString(pflags::line);
+                        pseutils::raise(err);
+                    } else if (c == pflags::stringFlagsImpl.stringType){
+                        pflags::stringFlagsImpl.inString = false;
+                        pflags::scopeChangeContext = false;
+                        tokenVector.reserve(tokenVector.size() + 1);
+                        tokenVector.push_back(Token(pflags::line - otherData, tokenString, 5));
+                        otherData = 0;
+                        pflags::scopeDepth = 0;
+                    } else {
+                        tokenString = tokenString + c;
+                    }
+                }
+
+                if ((c == '\t') || (c == ' ') || (c == '\n')){
+                    seek(&i, buffer);
+                    continue;
+                }
+                
+                if (pflags::scopeChangeContext){
+                    tokenVector.reserve(tokenVector.size() + 1);
+                    tokenVector.push_back(Indentation(pflags::line, pflags::scopeDepth));
+                }
+
+                pflags::scopeChangeContext = false;
+                pflags::scopeDepth = 0;
 
                 if (c == '/'){
                     if (buffer[i + 1] == '/'){
@@ -102,21 +163,116 @@ class PseudocodeParser {
                                 pflags::line += 1;
                             }
                         } while((i < buffer.size()) && (buffer[i] != '*') && (buffer[i + 1] != '/'));
+                        if (i >= buffer.size()){
+                            UnexpectedEOF err = UnexpectedEOF();
+                            pseutils::raise(err);
+                        }
+                    } else {
+                        tokenVector.reserve(tokenVector.size() + 1);
+                        char arr[2] = {c, '\0'};
+                        tokenVector.push_back(Token(pflags::line, arr, 1));
+                        continue;
                     }
                 }
 
-                if ((c == '+') || (c == '*') || (c == '%')){
+                if ((c == '+') || (c == '*') || (c == '%') || (c == '-')){
                     tokenVector.reserve(tokenVector.size() + 1);
                     char arr[2] = {c, '\0'};
-                    tokenVector.push_back(Token(pflags::line, arr));
+                    tokenVector.push_back(Token(pflags::line, arr, 1));
+                    continue;
                 }
 
+                if (c  == '<'){
+                    tokenVector.reserve(tokenVector.size() + 1);
+                    if (buffer[i + 1] == '-'){
+                        i += 1;
+                        char arr[3] = {'<', '-', '\0'};
+                        tokenVector.push_back(Token(pflags::line, arr, 3));
+                    } else if (buffer[i + 1] == '=') {
+                        i += 1;
+                        char arr[3] = {'<', '=', '\0'};
+                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                    } else {
+                        char arr[2] = {'<', '\0'};
+                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                    }
+                    continue;
+                }
+            
+                if (c == '>'){
+                    tokenVector.reserve(tokenVector.size() + 1);
+                    if (buffer[i + 1] == '='){
+                        char arr[3] = {'>', '=', '\0'};
+                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                    } else {
+                        char arr[2] = {'>', '\0'};
+                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                    }
+                    continue;
+                }
 
+                if ((c == 'N') && (buffer[i + 1] == 'U')){
+                    i += 1;
+                    tokenVector.reserve(tokenVector.size() + 1);
+                    if (buffer[i + 1] == '='){
+                        i += 1;
+                        char arr[4] = {'N', 'U', '=', '\0'};
+                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                        continue;
+                    } else if (buffer[i + 1] == ' '){
+                        i += 1;
+                        char arr[3] = {'N', 'U'};
+                        tokenVector.push_back(Token(pflags::line, arr, 2));
+                        continue;
+                    } else {
+                        i -= 1;
+                    }
+                }
+            
+                if ((c == 'S') && (buffer[i + 1] == 'I') && (buffer[i + 2] == ' ')){
+                    i += 2;
+                    char arr[3] = {'S', 'I', '\0'};
+                    tokenVector.reserve(tokenVector.size() + 1);
+                    tokenVector.push_back(Token(pflags::line, arr, 2));
+                    continue;
+                }
+            
+                if ((c == 'S') && (buffer[i + 1] == 'A') && 
+                    (buffer[i + 2] == 'U') && (buffer[i + 3] == ' ')){
+                        
+                    i += 3;
+                    char arr[4] = {'S', 'A', 'U', '\0'};
+                    tokenVector.reserve(tokenVector.size() + 1);
+                    tokenVector.push_back(Token(pflags::line, arr, 2));
+                }
+            
+                if (c == '='){
+                    tokenVector.reserve(tokenVector.size() + 1);
+                    char arr[2] = {'=', '\0'};
+                    tokenVector.push_back(Token(pflags::line, arr, 2));
+                    continue;
+                }
+            
+                if (c == '\"'){
+                    pflags::stringFlagsImpl.inString = true;
+                    pflags::stringFlagsImpl.stringType = '\"';
+                }
             }
         }
 
     private:
         char peekData;
+
+        void resetFlags(){
+            pflags::line = 1;
+            pflags::paranthesesDepth = 0;
+            pflags::scopeChangeContext = false;
+            pflags::scopeDepth = 0;
+            pflags::stringFlagsImpl.inString = false;
+            pflags::sucessiveSpaces = 0;
+
+            return;
+        }
 
         std::string buildToken(int *i, std::vector<char> buffer){
             std::string result = "";
@@ -137,7 +293,7 @@ class PseudocodeParser {
 
         /**
          * @b seek private method
-         * @brief increments i until @code charBuffer[i] @endcode is alnum or
+         * @brief increments i until @code buffer[i] @endcode is alnum or
          *        a special character (is not space, tab or newline)
          * @details when @code charBuffer[i] @endcode is '\t' @link @c pflags::scopeDepth @endlink is changed 
          *          @if the context is right @see @c pflags::scopeChangeContext @endif
@@ -148,6 +304,10 @@ class PseudocodeParser {
          */
         void seek(int *i, std::vector<char> buffer) {
             while (true) {
+                if (*i >= buffer.size()){
+                    return;
+                }
+
                 peek(*i, buffer);
 
                 if (peekData == ' ') {
@@ -171,7 +331,6 @@ class PseudocodeParser {
                     continue;
 
                 } else {
-                    pflags::scopeChangeContext = false;
                     pflags::sucessiveSpaces = 0;
                     return;
                 }

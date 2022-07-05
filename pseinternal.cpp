@@ -1,6 +1,6 @@
 #include <string>
 #include <vector>
-#include <iostream>
+//#include <iostream>
 
 #ifndef PSE_TOKENS_BASIC
 #define PSE_TOKENS_BASIC
@@ -19,13 +19,22 @@ class Token {
     protected:
         std::string __repr__ = "";
         int line;
+        int wrapperFlag = 0;
+        /* wrapperFlag helps the wrapper find the right type of token
+        to wrap this into and is set at parsing time
+
+        1 - arithmetic operator
+        2 - logical operator
+        3 - attribution operator
+        4 - relational operator
+        5 - string
+        */
 
     public:
-        Token(){}
-        Token(int line){
+        Token(int line){ //not intended for use, might delete later
             line = line;
         }
-        Token(int line, std::string repr){
+        Token(int line, std::string repr){ //might delete later
             line = line;
             __repr__ = repr;
         }
@@ -33,21 +42,20 @@ class Token {
             line = line;
             __repr__ = std::string(repr);
         }
+        Token(int line, const char* repr, int flag){
+            line = line;
+            __repr__ = std::string(repr);
+            wrapperFlag = flag;
+        }
+        Token(int line, std::string repr, int flag){
+            line = line;
+            __repr__ = repr;
+            wrapperFlag = flag;
+        }
         
         std::string strRepr(){
             return __repr__;
         }
-};
-
-class Scope {
-    public:
-    int depth = 0;
-
-    Scope(){}
-
-    Scope(int n){
-        depth = n;
-    }
 };
 
 #endif
@@ -156,7 +164,7 @@ namespace dtypes{
                 return T(0);
             }
 
-            // template <class T2>
+            // template <class T2>  //unused
             // T2 revertFraction(T2 number){
             //     if(isZero(number)){
             //         return T2("NaN");
@@ -448,13 +456,22 @@ namespace dtypes{
 #ifndef PSE_TOKENS
 #define PSE_TOKENS
 
-template <class DT>
-class Literal : public Token {
+class Indentation : public Token {
+    public:
+    int depth = 0;
     
-};
-
-class Separator : public Token {
-
+    Indentation(int line, int depth) : Token(line){
+        depth = depth;
+    }
+    Indentation(int line, int depth, std::string repr) : Token(line, repr){
+        depth = depth;
+    }
+    Indentation(int line, int depth, const char* repr) : Token(line, repr){
+        depth = depth;
+    }
+    Indentation(int line) : Token(line){}
+    Indentation(int line, std::string repr) : Token(line, repr){}
+    Indentation(int line, const char* repr) : Token(line, repr){}
 };
 
 class Identifier : public Token {
@@ -464,9 +481,6 @@ class Identifier : public Token {
 template <class DT1, class DT2>
 class Operator : public Token {
     
-};
-
-class Indentation : public Token {
 
 };
 
@@ -479,13 +493,11 @@ class Keyword : public Token {
 
 };
 
-class Subscript : public Token {
-
-};
+class Subscript : public Token {};
 
 namespace pseutils{
     Token wrapToken(Token T){
-        return Token();
+        return Token(1);
     }
 };
 

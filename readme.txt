@@ -1,7 +1,4 @@
-am modularizat parserul ptr a face debug mai usor
+daca se intampla sa treci pe aici pls verifica clasa PseudocodeParser ca e ceva suspect la
+seek() peek() si parseFromBuffer()
 
-pseinternal.cpp e cam complex si trb simplificat ptr a usura utilizarea
-
-am rezolvat majoritatea erorilor, insa Tokenele trb adaugate in mod explicit in TokenHolder
-
-am schimbat functionalitatea claselordin pseinternal.cpp
+de asemenea PseudocodeParser.buildToken() probabli nu va fi folosit
