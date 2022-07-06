@@ -3,6 +3,7 @@
 #include <vector>
 
 //kind of useless
+//this file should probably be deleted
 
 #ifndef PSE_DEBUG_LIB
 #define PSE_DEBUG_LIB

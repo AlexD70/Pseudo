@@ -9,7 +9,6 @@
  Token base class
  all token types are derived from this
 */
-
 class Token {
     protected:
         std::string __repr__ = "";
@@ -65,13 +64,12 @@ namespace dtypes{ // data types
 
     /*
     Number class, base for all numeric data types
-    internal use only! do not construct Number objects!!!
+    internal use only! do not declare Number objects!!!
 
     note: this has to implement type casts rather than what its doing rn
     note 2: this has to be worked on a bit after we write Natural
     note 3: maybe remove the operator overloads from Integer and Float????
     */
-
     class Number{
         protected:
             //flags for all numeric dtypes
@@ -231,6 +229,8 @@ namespace dtypes{ // data types
 
             
         public:
+            //get functions
+
             bool isNaN() {
                 return NaN;
             }
@@ -244,9 +244,13 @@ namespace dtypes{ // data types
             }
     };
 
-    
+    //this is a TODO class
     class Natural{};
 
+    /*
+    Float class
+    float numbers, maybe implement some very big number wrapper
+    */
     class Float : public Number{
         private:
             float val = 0;
@@ -297,6 +301,7 @@ namespace dtypes{ // data types
             }
 
         public:
+            //get function
             float getVal() {
                 return val;
             }
@@ -305,7 +310,7 @@ namespace dtypes{ // data types
                 val = _val;
             }
 
-            // Float(int val){
+            // Float(int val){  // i dont remember why i did this but lets leave it as-is for now
             //     val = (float) val;
             // }
 
@@ -334,10 +339,14 @@ namespace dtypes{ // data types
             }
     };
 
+    /*
+    Integer class; id like a big nr wrapper here too
+    */
     class Integer : public Number{
         private:
             int val = 0;
 
+            //this returns whether a string is an integer or not
             bool strToInt(std::string str){
                 bool isInt = true;
                 bool i = true;
@@ -422,9 +431,7 @@ namespace dtypes{ // data types
                 }
             }
 
-            // bool isNum(){
-            //     return !NaN;
-            // }
+            //operator overloads -- im not sure how much we will actually use them
 
             Integer operator+ (Integer& i){
                 return add(*this, i);
@@ -468,6 +475,8 @@ namespace dtypes{ // data types
             }
     };
 
+    /*
+    */
     class String {
         protected:
             std::string repr = "";
