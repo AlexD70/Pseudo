@@ -1,18 +1,13 @@
 #include <string>
 #include <vector>
-//#include <iostream>
+#include <typeinfo>
 
 #ifndef PSE_TOKENS_BASIC
 #define PSE_TOKENS_BASIC
 
 /*
-so um this document is very crazy
-i wonder how tf i wrote it but it works so im not questioning it
-so i advise u not to question it as well
-unless i did some major bad practice
-also we wont talk abt how i wanted to write: #define elif else if
-
-SEND HELP
+ Token base class
+ all token types are derived from this
 */
 
 class Token {
@@ -20,29 +15,32 @@ class Token {
         std::string __repr__ = "";
         int line;
         int wrapperFlag = 0;
-        /* wrapperFlag helps the wrapper find the right type of token
+        /* wrapperFlag helps the token wrapper find the right type of token
         to wrap this into and is set at parsing time
 
         1 - arithmetic operator
         2 - logical operator
         3 - attribution operator
         4 - relational operator
-        5 - string
+        5 - string literal
+        6 - int literal
+        7 - float literal
+        8 - bool literal (boolalpha)
         */
 
     public:
-        Token(int line){ //not intended for use, might delete later
+        Token(int line){ //internal use only
             line = line;
         }
         Token(int line, std::string repr){ //might delete later
             line = line;
             __repr__ = repr;
         }
-        Token(int line, const char* repr){
+        Token(int line, const char* repr){ //declaration w c-style strings, might delete this one
             line = line;
             __repr__ = std::string(repr);
         }
-        Token(int line, const char* repr, int flag){
+        Token(int line, const char* repr, int flag){ //declaration w c-style strings
             line = line;
             __repr__ = std::string(repr);
             wrapperFlag = flag;
@@ -53,7 +51,7 @@ class Token {
             wrapperFlag = flag;
         }
         
-        std::string strRepr(){
+        std::string strRepr(){ //get string representation
             return __repr__;
         }
 };
@@ -63,26 +61,38 @@ class Token {
 #ifndef PSE_DTYPES
 #define PSE_DTYPES
 
-namespace dtypes{
+namespace dtypes{ // data types
+
+    /*
+    Number class, base for all numeric data types
+    internal use only! do not construct Number objects!!!
+
+    note: this has to implement type casts rather than what its doing rn
+    note 2: this has to be worked on a bit after we write Natural
+    note 3: maybe remove the operator overloads from Integer and Float????
+    */
 
     class Number{
         protected:
+            //flags for all numeric dtypes
             bool NaN = false;
             bool Inf = false;
             bool MinusInf = false;
 
+            //flag setter function
             void setFlags(bool inf = false, bool minusinf = false, bool nan = false){
                 Inf = inf;
                 MinusInf = minusinf;
                 NaN = nan;
             }
 
+            //checks if a numeric dtype instance is zero
             template <class T>
             bool isZero(T number){
-                //dont question it just trust my methods
                 return !(number.isNaN() || number.isInf() || number.isMinusInf() || number.getVal());
             }
 
+            //add two numbers of the same type and return a member of the same class
             template <class T>
             T add(T j, T i){
                 T result = T(0);
@@ -110,6 +120,8 @@ namespace dtypes{
                 return result;
             };
 
+            //get sign of a numeric dtype instance
+            //returns 2 for NaN, 1 for +, -1 for - and 0 for 0
             template <class T>
             int sign(T number){
                 if (number.isNaN()){
@@ -130,6 +142,7 @@ namespace dtypes{
                 }
             }
 
+            //change sign of a numeric dtype instance
             template <class T>
             T changeSign(T& number){
                 if ( number.isNaN() ){
@@ -143,6 +156,7 @@ namespace dtypes{
                 }
             }
 
+            //multiply two objects of the same numeric dtype and return another instance of the same class
             template <class T>
             T mlt(T j, T i){
                 // this function is extremely unorthodox
@@ -164,7 +178,7 @@ namespace dtypes{
                 return T(0);
             }
 
-            // template <class T2>  //unused
+            //*** template <class T2>  //unused but keep it for now
             // T2 revertFraction(T2 number){
             //     if(isZero(number)){
             //         return T2("NaN");
@@ -174,6 +188,7 @@ namespace dtypes{
             //     }
             // }
 
+            //divide two objects of the same numeric dtype and return another instance of the same class
             template <class T2>
             T2 div(T2 j, T2 i){
                 int sgn = sign(j) * sign(i);
@@ -193,16 +208,21 @@ namespace dtypes{
                 return T2(0);
             }
 
-            //for your sanity just dont read the division
-            // NO LITERALLY ITS EXTREMELY CRAZY
+            //divide two objects of the same numeric dtype and return an instance of another class
+            //intended usage example:
+            //div<Float>(Integer(2), Integer(9));
             template <class T1, class T2>
             T2 div(T1 j, T1 i){
-                //this is getting a bit out of hand
                 T2 a = T2(j.__repr__()), b = T2(i.__repr__());
-                std::cout << a.getVal() << ' ' << b.getVal() << '\n';
                 return div<T2>(a, b);
             } 
 
+            //divide two different class dtype instances and return an instnace of the second objects class
+            //i didnt actually test this one
+            //but its intended usage is (this example should return a dtypes::Float):
+            //div(Integer(8), Float(1.2));
+            //it might work like this too, but as i said i didnt test:
+            //div(Float(7.9), Integer(3));  //returns dtypes::Integer
             template <class T1, class T2>
             T2 div(T1 j, T2 i){
                 // no i am not ok
@@ -448,7 +468,70 @@ namespace dtypes{
             }
     };
 
-    class String{};
+    class String {
+        protected:
+            std::string repr = "";
+
+        public:
+            String(std::string str){
+                repr = str;
+            }
+            String(char const* str){
+                repr = std::string(str);
+            }
+
+            std::string __repr__(){
+                return repr;
+            }
+
+            const char* toCStr(){
+                return repr.c_str();
+            }
+
+            String toUpper(){
+                std::string __new_repr__ = "";
+                for (char c : repr){
+                    __new_repr__ = __new_repr__ + (char) std::toupper(c);
+                }
+
+                repr = __new_repr__;
+                return *this;
+            }
+            String toUpper(std::string str){
+                std::string __new_str__ = "";
+                for (char c : str){
+                    __new_str__ = __new_str__ + (char) std::toupper(c);
+                }
+
+                return String(__new_str__);
+            }
+    
+            String toLower(){
+                std::string __new_repr__ = "";
+                for (char c : repr){
+                    __new_repr__ = __new_repr__ + (char) std::tolower(c);
+                }
+
+                repr = __new_repr__;
+                return *this;
+            }
+            String toLower(std::string str){
+                std::string __new_str__ = "";
+                for (char c : str){
+                    __new_str__ = __new_str__ + (char) std::tolower(c);
+                }
+
+                return String(__new_str__);
+            }
+    
+            Integer length(){
+                return Integer(repr.size());
+            }
+    
+            int __len__(){
+                return repr.size();
+            }
+    };
 };
 
 #endif
@@ -491,6 +574,76 @@ class Parantheses : public Token {
 
 class Keyword : public Token {
 
+};
+
+template <class T> // T is supposed to be from dtypes namespace
+class Literal : public Token {
+    protected:
+        T self;
+        std::string strVal;
+        int intVal;
+        float floatVal;
+        bool boolVal;
+        int type = 0;
+        /*
+        1 - string
+        2 - int
+        3 - float
+        4 - bool
+        */
+        
+        Literal(int w = 0){ //internal use only
+            wrapperFlag = w;
+            type = w - 4;
+            
+            switch (w){
+                case 5:
+                    strVal = self.__repr__();
+                    break;
+                case 6:
+                    intVal = self.getVal();
+                    break;
+                case 7:
+                    floatVal = self.getVal();
+                    break;
+                case 8:
+                    boolVal = self.getVal();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    public:
+        Literal(T self, int line) : Token(line, self.__repr__()){
+            const char* literalType = typeid(self).name();
+            if (literalType == "String"){
+                Literal(5);
+            } else if (literalType == "Integer"){
+                Literal(6);
+            } else if (literalType == "Float"){
+                Literal(7);
+            }
+        }
+
+        T getSelf(){
+            return self;
+        }
+
+        auto __repr__(){ //we might hv problems w this at compile time or runtime
+            switch (type){
+                case 1:
+                    return strVal;
+                case 2:
+                    return intVal;
+                case 3:
+                    return floatVal;
+                case 4:
+                    return boolVal;
+                default:
+                    return;
+            }
+        }
 };
 
 class Subscript : public Token {};

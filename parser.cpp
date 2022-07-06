@@ -10,9 +10,8 @@
  * @b pflags namespace
  * @brief flags used for parsing
  * @details @li @c stringFlagsImpl.stringType is either '\'' or '\"'
- *          @li @c trailingZeros and @c startingZeros are intended to be used to raise warnings
  *          @li @c scopeDepth keeps account of current scope by counting indentation
- *          @li @c line is used for stackTrace building purposes @see @c Throwable.buildStackTrace()
+ *          @li @c line is used for stackTrace building purposes @see @c Throwable.buildStackTrace() and token declaration
  */
 namespace pflags {
     struct stringFlags

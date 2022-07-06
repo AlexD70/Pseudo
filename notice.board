@@ -1,0 +1,23 @@
+nota ptr sine: trb sa fac un script sa genereze cutii dastea automat
+
+╔════════════════════════════════════════════════╗
+║                                                ║
+║                                                ║
+║ 1. verifica pls seek() peek() si               ║
+║    parseFromBuffer() ca e ceva sus la ele      ║
+║                                                ║
+║ 2. adaugam f-strings???                        ║
+║                                                ║
+║ 3. sunt multe functii pe care probabil nu le   ║
+║    vom folosi: vezi comentarii ptr detalii     ║
+║                                                ║
+║ 4. pls pune comentarii cand faci modificari    ║
+║    majore si pune chestii aici si in tasks.todo║
+║                                                ║
+║ 5. pune fisierele si folderele care nu vrei sa ║
+║    fie urcate pe github in .gitignore          ║
+║                                                ║
+║                                                ║
+║                                                ║
+╚════════════════════════════════════════════════╝
+
