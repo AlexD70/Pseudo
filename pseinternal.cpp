@@ -61,6 +61,7 @@ class Token {
 #define PSE_DTYPES
 
 namespace dtypes{ // data types
+    //TODO add booleans
 
     /*
     Number class, base for all numeric data types
@@ -476,6 +477,8 @@ namespace dtypes{ // data types
     };
 
     /*
+    String class
+    TODO we hv to add more functions here as we will need them
     */
     class String {
         protected:
@@ -485,14 +488,16 @@ namespace dtypes{ // data types
             String(std::string str){
                 repr = str;
             }
-            String(char const* str){
+            String(char const* str){ //c-style string constructor
                 repr = std::string(str);
             }
+            //maybe add a copy object constructor here and on the classes before
 
             std::string __repr__(){
                 return repr;
             }
 
+            //returns a c-style string from repr
             const char* toCStr(){
                 return repr.c_str();
             }
@@ -506,6 +511,10 @@ namespace dtypes{ // data types
                 repr = __new_repr__;
                 return *this;
             }
+            
+            //static overload of toUpper()
+            //note that i mean static as in java-static
+            //cpp static is smth else, dont use it!
             String toUpper(std::string str){
                 std::string __new_str__ = "";
                 for (char c : str){
@@ -524,6 +533,8 @@ namespace dtypes{ // data types
                 repr = __new_repr__;
                 return *this;
             }
+
+            //static overload of toLower()
             String toLower(std::string str){
                 std::string __new_str__ = "";
                 for (char c : str){
@@ -537,6 +548,7 @@ namespace dtypes{ // data types
                 return Integer(repr.size());
             }
     
+            //returns repr's length as an int, unlike length() which returns a dtypes::Integer
             int __len__(){
                 return repr.size();
             }
@@ -548,6 +560,11 @@ namespace dtypes{ // data types
 #ifndef PSE_TOKENS
 #define PSE_TOKENS
 
+/*
+ Indentation class
+ this has a lot of constructors of which some may be useless
+ i also feel like it misses smth
+*/
 class Indentation : public Token {
     public:
     int depth = 0;
@@ -566,25 +583,24 @@ class Indentation : public Token {
     Indentation(int line, const char* repr) : Token(line, repr){}
 };
 
-class Identifier : public Token {
+//TODO
+class Identifier : public Token {};
 
-};
-
+//TODO
 template <class DT1, class DT2>
-class Operator : public Token {
-    
+class Operator : public Token {};
 
-};
+//TODO
+class Parantheses : public Token {};
 
-class Parantheses : public Token {
-    class ParanthesesStart{};
-    class ParanthesesEnd{};
-};
+//TODO
+class Keyword : public Token {};
 
-class Keyword : public Token {
-
-};
-
+/*
+Literal class
+used for String, Integer, Float and Bool literals
+i feel like this misses smth too
+*/
 template <class T> // T is supposed to be from dtypes namespace
 class Literal : public Token {
     protected:
@@ -625,7 +641,7 @@ class Literal : public Token {
 
     public:
         Literal(T self, int line) : Token(line, self.__repr__()){
-            const char* literalType = typeid(self).name();
+            const char* literalType = typeid(self).name(); //theres a chance this will create problems
             if (literalType == "String"){
                 Literal(5);
             } else if (literalType == "Integer"){
@@ -655,9 +671,13 @@ class Literal : public Token {
         }
 };
 
+//TODO
 class Subscript : public Token {};
 
 namespace pseutils{
+    //TODO
+    //main purpose is to wrap a Token into one of its subclasses and call validator functions
+    //for some of them (example: Keywords)
     Token wrapToken(Token T){
         return Token(1);
     }
