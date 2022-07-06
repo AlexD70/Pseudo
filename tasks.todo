@@ -1,4 +1,5 @@
 add comments 
+write template <T> Literal to use inside the parser as Literal<String>
 build basic parser
 build token wrapper and token types + errors + warnings
 build context validator and dtypes + errors + warnings
