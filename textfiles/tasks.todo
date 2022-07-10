@@ -1,5 +1,4 @@
-add comments 
-improve dtypes::String, use Literal<String> inside parser
+improve dtypes::String
 write IntegerToString cast, write StringToInteger cast and other casts
 implement casts inside pseinternal.cpp
 build basic parser

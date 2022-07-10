@@ -1,4 +1,4 @@
-
+#pragma once
  
 #ifndef PSE_CASTS
 #define PSE_CASTS

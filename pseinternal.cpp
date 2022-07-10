@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <vector>
 #include <typeinfo>
@@ -11,7 +12,7 @@
 */
 class Token {
     protected:
-        std::string __repr__ = "";
+        std::string repr = "";
         int line;
         int wrapperFlag = 0;
         /* wrapperFlag helps the token wrapper find the right type of token
@@ -28,30 +29,31 @@ class Token {
         */
 
     public:
+        Token(){} //internal use only
         Token(int line){ //internal use only
             line = line;
         }
         Token(int line, std::string repr){ //might delete later
             line = line;
-            __repr__ = repr;
+            repr = repr;
         }
-        Token(int line, const char* repr){ //declaration w c-style strings, might delete this one
+        Token(int line, const char* _repr){ //declaration w c-style strings, might delete this one
             line = line;
-            __repr__ = std::string(repr);
+            repr = std::string(_repr);
         }
-        Token(int line, const char* repr, int flag){ //declaration w c-style strings
+        Token(int line, const char* _repr, int flag){ //declaration w c-style strings
             line = line;
-            __repr__ = std::string(repr);
+            repr = std::string(_repr);
             wrapperFlag = flag;
         }
         Token(int line, std::string repr, int flag){
             line = line;
-            __repr__ = repr;
+            repr = repr;
             wrapperFlag = flag;
         }
         
-        std::string strRepr(){ //get string representation
-            return __repr__;
+        std::string __repr__(){ //get string representation
+            return repr;
         }
 };
 
@@ -485,6 +487,7 @@ namespace dtypes{ // data types
             std::string repr = "";
 
         public:
+            String(){}
             String(std::string str){
                 repr = str;
             }
@@ -532,6 +535,10 @@ namespace dtypes{ // data types
 
                 repr = __new_repr__;
                 return *this;
+            }
+
+            std::string getVal(){
+                return __repr__();
             }
 
             //static overload of toLower()
@@ -590,8 +597,37 @@ class Identifier : public Token {};
 template <class DT1, class DT2>
 class Operator : public Token {};
 
-//TODO
-class Parantheses : public Token {};
+//check for improvements
+//maybe remove encapsulation
+class Parantheses : public Token {
+    private:
+        std::vector<Token> tokenVector = std::vector<Token>();
+        int stackDepth;
+
+    public:
+        Parantheses(int line, int stackDepth) : Token(line){
+            stackDepth = stackDepth;
+        }
+
+        std::vector<Token> getCopyOfTokenVector() {
+            return std::vector<Token>(tokenVector);
+        }
+
+        void ressignTokenVector(std::vector<Token> &newVector){
+            tokenVector = newVector;
+            return;
+        }
+
+        void appendToVector(Token &what){
+            tokenVector.reserve(tokenVector.size() + 1);
+            tokenVector.push_back(what);
+            return;
+        }
+
+        int getStackDepth(){
+            return stackDepth;
+        }
+};
 
 //TODO
 class Keyword : public Token {};
@@ -599,7 +635,7 @@ class Keyword : public Token {};
 /*
 Literal class
 used for String, Integer, Float and Bool literals
-i feel like this misses smth too
+we need to work on this one a little more
 */
 template <class T> // T is supposed to be from dtypes namespace
 class Literal : public Token {
@@ -621,17 +657,21 @@ class Literal : public Token {
             wrapperFlag = w;
             type = w - 4;
             
-            switch (w){
+            switch (w){ //solve compiling errors here somehow
+            //try catch wont work since its a compilation error
                 case 5:
-                    strVal = self.__repr__();
+                    strVal = self.getVal();
                     break;
                 case 6:
+                //cannot convert ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’} to ‘int’ in assignment
                     intVal = self.getVal();
                     break;
                 case 7:
+                //cannot convert ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’} to ‘float’ in assignment
                     floatVal = self.getVal();
                     break;
                 case 8:
+                //cannot convert ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’} to ‘bool’ in assignment
                     boolVal = self.getVal();
                     break;
                 default:
@@ -640,8 +680,9 @@ class Literal : public Token {
         }
 
     public:
-        Literal(T self, int line) : Token(line, self.__repr__()){
+        Literal(T self, int line) : Token(line){
             const char* literalType = typeid(self).name(); //theres a chance this will create problems
+            line = line;
             if (literalType == "String"){
                 Literal(5);
             } else if (literalType == "Integer"){

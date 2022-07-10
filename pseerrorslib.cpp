@@ -1,6 +1,11 @@
+#pragma once
 #include <exception>
 #include <string>
 #include <iostream>
+
+//most of the following are self explanatory
+//note: smth has to be done w pseutils::raise()
+//might hv solved pseutils::raise() a double check wouldnt hurt tho
 
 #ifndef PSEERR_BASIC
 #define PSERR_BASIC
@@ -85,7 +90,7 @@ namespace pseutils{
         std::cout << T.what() << '\n';
 
         if (T.terminate()){
-            //idk what to do here probably a goto or setting a bool flag to true/false
+            throw T;
         }
 
         return;
