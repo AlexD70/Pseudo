@@ -1,4 +1,5 @@
 improve dtypes::String
+fix compilation errors in pseinternal.cpp
 write IntegerToString cast, write StringToInteger cast and other casts
 implement casts inside pseinternal.cpp
 build basic parser
