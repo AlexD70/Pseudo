@@ -537,6 +537,7 @@ namespace dtypes{ // data types
                 return *this;
             }
 
+            //TODO: some refactorings have to be done
             std::string getVal(){
                 return __repr__();
             }
@@ -609,7 +610,7 @@ class Parantheses : public Token {
             stackDepth = stackDepth;
         }
 
-        std::vector<Token> getCopyOfTokenVector() {
+        std::vector<Token> dumpAll() {
             return std::vector<Token>(tokenVector);
         }
 
@@ -637,83 +638,89 @@ Literal class
 used for String, Integer, Float and Bool literals
 we need to work on this one a little more
 */
-template <class T> // T is supposed to be from dtypes namespace
+template <class T, typename P> // T is supposed to be from dtypes namespace
 class Literal : public Token {
     protected:
+        P repr;
         T self;
-        std::string strVal;
-        int intVal;
-        float floatVal;
-        bool boolVal;
-        int type = 0;
-        /*
-        1 - string
-        2 - int
-        3 - float
-        4 - bool
-        */
-        
-        Literal(int w = 0){ //internal use only
-            wrapperFlag = w;
-            type = w - 4;
-            
-            switch (w){ //solve compiling errors here somehow
-            //try catch wont work since its a compilation error
-                case 5:
-                    strVal = self.getVal();
-                    break;
-                case 6:
-                //cannot convert ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’} to ‘int’ in assignment
-                    intVal = self.getVal();
-                    break;
-                case 7:
-                //cannot convert ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’} to ‘float’ in assignment
-                    floatVal = self.getVal();
-                    break;
-                case 8:
-                //cannot convert ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’} to ‘bool’ in assignment
-                    boolVal = self.getVal();
-                    break;
-                default:
-                    break;
-            }
-        }
 
     public:
         Literal(T self, int line) : Token(line){
-            const char* literalType = typeid(self).name(); //theres a chance this will create problems
-            line = line;
-            if (literalType == "String"){
-                Literal(5);
-            } else if (literalType == "Integer"){
-                Literal(6);
-            } else if (literalType == "Float"){
-                Literal(7);
-            }
+            self = self;
+            repr = self.getVal();
         }
 
-        T getSelf(){
+        P __repr__(){
+            return repr;
+        }
+
+        T __self__(){
             return self;
-        }
-
-        auto __repr__(){ //we might hv problems w this at compile time or runtime
-            switch (type){
-                case 1:
-                    return strVal;
-                case 2:
-                    return intVal;
-                case 3:
-                    return floatVal;
-                case 4:
-                    return boolVal;
-                default:
-                    return;
-            }
         }
 };
 
+//actually i think we dont need this overload at all
+// template <class T, class P> //overload to allow P to be std::string
+// class Literal : public Token {
+//     protected:
+//         P repr;
+
+//     public:
+//         Literal(T self, int line) : Token(line){
+//             self = self;
+//             repr = self.getVal();
+//         }
+
+//         P __repr__(){
+//             return repr;
+//         }
+
+//         T __self__(){
+//             return self;
+//         }
+// };
+
 //TODO
-class Subscript : public Token {};
+class Subscript : public Token {
+    protected:
+        //this has an internal logic similar to the parser itself
+        //TODO maybe add an expression validator built in for this, or maybe use an external one
+        std::vector<Token> tokenVector = std::vector<Token>();
+        struct paranthesesStackNode {
+            Parantheses *self = nullptr;
+            paranthesesStackNode *next = nullptr;
+            paranthesesStackNode *back = nullptr;
+        };
+
+        paranthesesStackNode node1 = paranthesesStackNode();
+        paranthesesStackNode *actualNode = &node1;
+
+        Subscript *subscriptPtr = nullptr;
+
+    public:
+        Subscript(int line) : Token(line){}
+
+        void appendToken(Token what, int *paranthesesDepthPtr = nullptr, bool *inSubscriptPtr = nullptr){
+            
+        }
+
+
+        void appendParantheses(Parantheses what){
+
+        }
+
+        void appendParantheses(Subscript what){
+
+        }
+
+        void exitParantheses(){}
+
+        void exitSubscript(){}
+
+        std::vector<Token> dumpAll(){
+            return std::vector<Token>(tokenVector);
+        }
+};
 
 namespace pseutils{
     //TODO

@@ -1,28 +1,11 @@
 //#pragma once //for some reason this gives a warning
 #include <fstream>
 #include <iostream>
-#include "pseerrorslib.cpp"
 #include <vector>
-#include "util.cpp"
-#include "pseinternal.cpp"
-
-//parsing flags
-namespace pflags {
-    struct stringFlags
-    {
-        bool inString = false;
-        char stringType;
-    };
-
-    stringFlags stringFlagsImpl;
-
-    //used to track whether 4 spaces change scope or not in teh actual context
-    bool scopeChangeContext = false;
-    int paranthesesDepth = 0;
-    int scopeDepth = 0;
-    int sucessiveSpaces = 0;
-    int line = 1;
-}
+#include "util.h"
+#include "pseinternal.h"
+#include "parsingflags.h"
+#include "pseerrorslib.h"
 
 /*
  PseudocodeParser class
@@ -34,9 +17,12 @@ class PseudocodeParser {
         std::vector<Token> tokenVector = std::vector<Token>();
         struct paranthesesStackNode {
             Parantheses *self = nullptr;
-            Parantheses *next = nullptr;
+            paranthesesStackNode *next = nullptr;
+            paranthesesStackNode *back = nullptr;
         };
-        paranthesesStackNode node1, actualNode;
+        paranthesesStackNode node1 = paranthesesStackNode();
+        paranthesesStackNode *actualNode = &node1;
+        Subscript *subscriptPtr = nullptr;
 
         //saves file contents into charBuffer
         void readFile(std::string filename) {
@@ -118,7 +104,7 @@ class PseudocodeParser {
                     } else if (c == pflags::stringFlagsImpl.stringType) { //check for string end
                         pflags::stringFlagsImpl.inString = false;
                         pflags::scopeChangeContext = false;
-                        appendToVector<Token>(tokenVector, Literal(dtypes::String(tokenString), pflags::line - otherData));
+                        appendToParanthesesStack(Literal<dtypes::String, std::string>(dtypes::String(tokenString), pflags::line - otherData));
                         otherData = 0; //reset this for later use
                         pflags::scopeDepth = 0;
 
@@ -136,12 +122,12 @@ class PseudocodeParser {
                 
                 if (pflags::scopeChangeContext){ //performs this at the beginning of every line that has at least one token
                     //or at least this is the intended behavior
-                    appendToVector<Token>(tokenVector, Indentation(pflags::line, pflags::scopeDepth));
+                    appendToParanthesesStack(Indentation(pflags::line, pflags::scopeDepth));
                     pflags::scopeChangeContext = false;
                     pflags::scopeDepth = 0;
                 }
 
-                //IMPORTANT: problem w scopeChangeContext flag for multi-line comments
+                //TODO IMPORTANT: problem w scopeChangeContext flag for multi-line comments
                 if (c == '/'){ // division and comments
                     if (buffer[i + 1] == '/'){ // single-line comment
                         i += 1;
@@ -167,62 +153,59 @@ class PseudocodeParser {
                         }
                     } else { // division
                         char arr[2] = {c, '\0'}; // builds a c-style null-terminated string
-                        appendToVector(tokenVector, Token(pflags::line, arr, 1));
+                        appendToParanthesesStack(Token(pflags::line, arr, 1));
                         continue;
                     }
                 }
 
                 if ((c == '+') || (c == '*') || (c == '%') || (c == '-')){ //addition, multiplication, modulus, subtraction
                     char arr[2] = {c, '\0'}; // builds a c-style null-terminated string
-                    appendToVector(tokenVector, Token(pflags::line, arr, 1));
+                    appendToParanthesesStack(Token(pflags::line, arr, 1));
                     continue;
                 }
 
                 if (c  == '<'){ // LT, LTEQ, attribution
-                    tokenVector.reserve(tokenVector.size() + 1);
                     if (buffer[i + 1] == '-'){ // atttribution
                         i += 1;
                         char arr[3] = {'<', '-', '\0'};
-                        tokenVector.push_back(Token(pflags::line, arr, 3));
+                        appendToParanthesesStack(Token(pflags::line, arr, 3));
 
                     } else if (buffer[i + 1] == '=') {  // LTEQ
                         i += 1;
                         char arr[3] = {'<', '=', '\0'};
-                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                        appendToParanthesesStack(Token(pflags::line, arr, 4));
 
                     } else { // LT
                         char arr[2] = {'<', '\0'};
-                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                        appendToParanthesesStack(Token(pflags::line, arr, 4));
                     }
                     continue;
                 }
             
                 if (c == '>'){ // GT, GTEQ
-                    tokenVector.reserve(tokenVector.size() + 1);
                     if (buffer[i + 1] == '='){  // GTEQ
                         char arr[3] = {'>', '=', '\0'};
-                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                        appendToParanthesesStack(Token(pflags::line, arr, 4));
 
                     } else {  // GT
                         char arr[2] = {'>', '\0'};
-                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                        appendToParanthesesStack(Token(pflags::line, arr, 4));
                     }
                     continue;
                 }
 
                 if ((c == 'N') && (buffer[i + 1] == 'U')){ // NOT (NU), NOTEQ (NU=)
                     i += 2;
-                    tokenVector.reserve(tokenVector.size() + 1);
                     if (buffer[i + 1] == '='){ // NOTEQ (NU=)
                         char arr[4] = {'N', 'U', '=', '\0'};
-                        tokenVector.push_back(Token(pflags::line, arr, 4));
+                        appendToParanthesesStack(Token(pflags::line, arr, 4));
                         continue;
                     } else if (buffer[i + 1] == ' '){ // NOT
                         //checks for ' ' cuz if smth is appended to NU directly it should be an indentifier
                         //rather than a logical operator
                         //this is subject to change tho
                         char arr[3] = {'N', 'U'};
-                        tokenVector.push_back(Token(pflags::line, arr, 2));
+                        appendToParanthesesStack(Token(pflags::line, arr, 2));
                         continue;
                     } else {
                         i -= 2;
@@ -233,7 +216,7 @@ class PseudocodeParser {
                     // performs the blank space check too (see NOT)
                     i += 2;
                     char arr[3] = {'S', 'I', '\0'};
-                    appendToVector(tokenVector, Token(pflags::line, arr, 2));
+                    appendToParanthesesStack(Token(pflags::line, arr, 2));
                     continue;
                 }
             
@@ -242,13 +225,13 @@ class PseudocodeParser {
                     // same as AND and NOT
                     i += 3;
                     char arr[4] = {'S', 'A', 'U', '\0'};
-                    appendToVector(tokenVector, Token(pflags::line, arr, 2));
+                    appendToParanthesesStack(Token(pflags::line, arr, 2));
                     continue;
                 }
             
                 if (c == '='){ // EQ
                     char arr[2] = {'=', '\0'};
-                    appendToVector(tokenVector, Token(pflags::line, arr, 2));
+                    appendToParanthesesStack(Token(pflags::line, arr, 2));
                     continue;
                 }
             
@@ -265,22 +248,46 @@ class PseudocodeParser {
                     Segmentation failed. Core dumped.
                     */
                     pflags::paranthesesDepth += 1;
-                    if (!node1.self){
-                        Parantheses newParantheses = Parantheses(pflags::line, pflags::paranthesesDepth);
-                        node1 = paranthesesStackNode();
-                        node1.self = &newParantheses;
-                    }
                     Parantheses newParantheses = Parantheses(pflags::line, pflags::paranthesesDepth);
+                    if (pflags::paranthesesDepth == 1){
+                        node1.self = &newParantheses;
+                        appendToVector<Token>(tokenVector, newParantheses);
+                    }
+
+                    //ahem a lot of pointers, im actually using a double-linked list
                     paranthesesStackNode node;
+                    paranthesesStackNode *lastNode;
                     node.self = &newParantheses;
+                    (*actualNode).next = &node;
+                    lastNode = actualNode;
+                    actualNode = &node;
+                    (*actualNode).back = lastNode;
                 }
 
-                //TODO implement parantheses stack
-                //CHARACTERS LEFT: (), [], f (f-strings, if we decide to implement them + changes in string path)
+                if (c == ')'){
+                    pflags::paranthesesDepth -= 1;
+                    if (pflags::paranthesesDepth == 0){
+                        continue;
+                    } else if (pflags::paranthesesDepth < 0){
+                        BadParanthesesNesting err = BadParanthesesNesting(pflags::line);
+                        pseutils::raise(err);
+                    }
+
+                    actualNode = (*actualNode).back;
+                }
+
+                
+                //TODO debug this shit
+                //CHARACTERS LEFT: [], f (f-strings, if we decide to implement them + changes in string path)
                 //                 default (we shouldnt check for numbers at this level and pass that to the token wrapper)
 
                 //TODO this should be even more modularized, so that we use as little code here as possible
                 // id rather have 27822782 small functions rather than a single, but very long, function
+            }
+
+            if (pflags::paranthesesDepth > 0){
+                UnexpectedEOF err = UnexpectedEOF("UnexpextedEOF: raised while parsing due to opened but not closed parantheses.");
+                pseutils::raise(err);
             }
         }
 
@@ -314,6 +321,15 @@ class PseudocodeParser {
                      ((peekData != ' ') && (peekData != '\t') && (peekData != '\n')));
 
             return result;
+        }
+
+        //appending to parantheses stack if that is the case
+        void appendToParanthesesStack(Token what){
+            if (pflags::paranthesesDepth > 0){
+                (*(*actualNode).self).appendToVector(what);
+            } else {
+                appendToVector<Token>(tokenVector, what);
+            }
         }
 
         // increments i until buffer[i] is not space, tab or newline

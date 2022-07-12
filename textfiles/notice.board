@@ -6,17 +6,41 @@ nota ptr sine: trb sa fac un script sa genereze cutii dastea automat
 ║ 1. verifica pls seek() peek() si               ║
 ║    parseFromBuffer() ca e ceva sus la ele      ║
 ║                                                ║
-║ 2. adaugam f-strings???                        ║
-║                                                ║
-║ 3. sunt multe functii pe care probabil nu le   ║
-║    vom folosi: vezi comentarii ptr detalii     ║
-║                                                ║
-║ 4. pls pune comentarii cand faci modificari    ║
-║    majore si pune chestii aici si in tasks.todo║
-║                                                ║
-║ 5. pune fisierele si folderele care nu vrei sa ║
-║    fie urcate pe github in .gitignore          ║
-║                                                ║
-║                                                ║
-║                                                ║
-╚════════════════════════════════════════════════╝
+║ 2. adaugam f-strings???                        ║                          ╔═══════════════════════════════════════╗
+║                                                ║                          ║                                       ║
+║ 3. sunt multe functii pe care probabil nu le   ║                          ║                                       ║
+║    vom folosi: vezi comentarii ptr detalii     ║                          ║                                       ║
+║                                                ║                          ║                                       ║
+║ 4. pls pune comentarii cand faci modificari    ║                          ║                                       ║
+║    majore si pune chestii aici si in tasks.todo║                          ║                                       ║
+║                                                ║                          ║                                       ║
+║ 5. pune fisierele si folderele care nu vrei sa ║                          ║                                       ║
+║    fie urcate pe github in .gitignore          ║                          ║                                       ║
+║                                                ║                          ║                                       ║
+║                                                ║                          ║                                       ║
+║                                                ║                          ║                                       ║
+╚════════════════════════════════════════════════╝                          ║                                       ║
+                                                                            ║                                       ║
+                                                                            ║                                       ║
+                                                                            ╚═══════════════════════════════════════╝
+
+                ╔════════════════════════════════════════════════╗
+                ║                                                ║
+                ║    6. a devenit putin complicat in parser      ║
+                ║  din cauza pointerilor ptr paranteze si        ║
+                ║  subscripturi. o sa fie nasol la debugging.    ║
+                ║                                                ║
+                ║    7. use .h for libraries. the compiler       ║
+                ║  doesnt actually make any difference but it is ║
+                ║  kind of a convention                          ║
+                ║                                                ║
+                ║                                                ║
+                ║                                                ║
+                ║                                                ║
+                ║                                                ║
+                ║                                                ║
+                ║                                                ║
+                ║                                                ║
+                ║                                                ║
+                ║                                                ║
+                ╚════════════════════════════════════════════════╝
