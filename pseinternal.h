@@ -1,7 +1,20 @@
-#pragma once
+#ifndef PSE_INTERNAL_STR
+#define PSE_INTERNAL_STR
 #include <string>
+#endif
+
+#ifndef PSE_INTERNAL_VECTOR
+#define PSE_INTERNAL_VECTOR
 #include <vector>
+#endif
+
+#ifndef PSE_INTERNAL_TYPES
+#define PSE_INTERNAL_TYPES
 #include <typeinfo>
+#endif
+
+//error libs
+#include "internalerrlib.h"
 
 #ifndef PSE_TOKENS_BASIC
 #define PSE_TOKENS_BASIC
@@ -680,7 +693,8 @@ class Literal : public Token {
 //         }
 // };
 
-//TODO
+//maybe improve the logic of how the parser handles subscripts and parantheses idk
+//cuz if we keep this logic theres a chance we will have a hard time at context validating and debugging
 class Subscript : public Token {
     protected:
         //this has an internal logic similar to the parser itself
@@ -696,26 +710,88 @@ class Subscript : public Token {
         paranthesesStackNode *actualNode = &node1;
 
         Subscript *subscriptPtr = nullptr;
+        bool inSubscript = false;
+        bool inParantheses = false;
+        bool subscriptInParantheses = false;
 
     public:
         Subscript(int line) : Token(line){}
 
-        void appendToken(Token what, int *paranthesesDepthPtr = nullptr, bool *inSubscriptPtr = nullptr){
+        void appendToken(Token what){
+            if (inSubscript){
+                if (subscriptPtr){
+                    (*subscriptPtr).appendToken(what);
+                } else { 
+                    InternalError err = InternalError("pseinternal.h, in class Subscript, in function appendToken");
+                    pseutils::raise(err);
+                }
+            } else if (inParantheses){
+                if (actualNode){
+                    (*(*actualNode).self).appendToVector(what);
+                } else {
+                    InternalError err = InternalError("pseinternal.h, in class Subscript, in function appendToken");
+                    pseutils::raise(err);
+                }
+            } else {
+                tokenVector.reserve(tokenVector.size() + 1);
+                tokenVector.push_back(what);
+            }
             
+            return;
         }
 
 
         void appendParantheses(Parantheses what){
+            //this trusts the caller function took care of all relevant flags
 
+            if (!inParantheses){
+                node1.self = &what;
+                appendToken(what);
+                inParantheses = true;
+            }  else {
+                (*(*actualNode).self).appendToVector(what);
+                paranthesesStackNode node;
+                paranthesesStackNode *lastNode;
+                node.self = &what;
+                (*actualNode).next = &node;
+                lastNode = actualNode;
+                actualNode = &node;
+                (*actualNode).back = lastNode;
+            }
+
+            if (inSubscript){
+                (*subscriptPtr).appendParantheses(what);
+            }
         }
 
-        void appendParantheses(Subscript what){
+        void appendSubscript(Subscript what){
+            if (inParantheses){
+                inParantheses = false;
+                subscriptInParantheses = true;
+                inSubscript = true;
 
+                (*(*actualNode).self).appendToVector(what);
+            } else if (inSubscript){
+                (*subscriptPtr).appendSubscript(what);
+            } else {
+                appendToken(what);
+            }
         }
 
-        void exitParantheses(){}
+        void exitParantheses(){
+            if ((*actualNode).back){
+                actualNode = (*actualNode).back;
+            } else {
+                inParantheses = false;
+            }
+        }
 
-        void exitSubscript(){}
+        void exitSubscript(){
+            inSubscript = false;
+            if (subscriptInParantheses){
+                inParantheses = true;
+            }
+        }
 
         std::vector<Token> dumpAll(){
             return std::vector<Token>(tokenVector);

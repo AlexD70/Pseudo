@@ -1,5 +1,8 @@
-#pragma once
+#ifndef PSE_INTERNAL_VECTOR
+#define PSE_INTERNAL_VECTOR
 #include <vector>
+#endif
+
 //#include <typeinfo>
 
 //these snippets can be used even outside this project to make appending to std::vector simpler

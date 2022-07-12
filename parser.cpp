@@ -1,11 +1,27 @@
-//#pragma once //for some reason this gives a warning
+#ifndef PSE_INTERNAL_FILEIO
+#define PSE_INTERNAL_FILEIO
 #include <fstream>
-#include <iostream>
+#endif
+
+#ifndef PSE_INTERNAL_VECTOR
+#define PSE_INTERNAL_VECTOR
 #include <vector>
+#endif
+
+//util
 #include "util.h"
+
+//internal libs
 #include "pseinternal.h"
+
+//parser libs
 #include "parsingflags.h"
+
+//error libs
 #include "pseerrorslib.h"
+
+//temporary include
+#include <iostream>
 
 /*
  PseudocodeParser class
@@ -252,16 +268,16 @@ class PseudocodeParser {
                     if (pflags::paranthesesDepth == 1){
                         node1.self = &newParantheses;
                         appendToVector<Token>(tokenVector, newParantheses);
+                    } else {
+                        //ahem a lot of pointers, im actually using a double-linked list
+                        paranthesesStackNode node;
+                        paranthesesStackNode *lastNode;
+                        node.self = &newParantheses;
+                        (*actualNode).next = &node;
+                        lastNode = actualNode;
+                        actualNode = &node;
+                        (*actualNode).back = lastNode;
                     }
-
-                    //ahem a lot of pointers, im actually using a double-linked list
-                    paranthesesStackNode node;
-                    paranthesesStackNode *lastNode;
-                    node.self = &newParantheses;
-                    (*actualNode).next = &node;
-                    lastNode = actualNode;
-                    actualNode = &node;
-                    (*actualNode).back = lastNode;
                 }
 
                 if (c == ')'){

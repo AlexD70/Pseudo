@@ -1,61 +1,17 @@
-#pragma once
-#include <exception>
+#ifndef PSE_INTERNAL_STR
+#define PSE_INTERNAL_STR
 #include <string>
-#include <iostream>
+#endif
 
 //most of the following are self explanatory
 //note: smth has to be done w pseutils::raise()
 //might hv solved pseutils::raise() a double check wouldnt hurt tho
 
-#ifndef PSEERR_BASIC
-#define PSERR_BASIC
-class Throwable : public std::exception{
-    public:
-        Throwable(std::string message, bool reqTermination) {
-            stackTrace = message;
-            reqTermination = reqTermination;
-        }
-
-        Throwable(std::string message) {
-            stackTrace = message;
-        }
-
-        Throwable(Throwable& T){
-            stackTrace = T.what();
-            reqTermination = T.terminate();
-        }
-
-        const char* what(){
-            return stackTrace.c_str();
-        }
-
-        std::string buildStackTrace(std::string exceptionType, int* lines, std::string* lineContents, int scopeDepth){
-            std::string newStackTrace;
-            //std::string __tabs = "";
-            newStackTrace = "\n" + exceptionType;
-
-            for (int i = 0; i < scopeDepth; i++){
-                //__tabs += "\t";
-                newStackTrace +=  " at line " + std::to_string(lines[i]) + ":\n\t" /*__tabs*/ + lineContents[i] + "\n";
-            }
-
-            stackTrace = newStackTrace;
-            return newStackTrace;
-        }
-
-        bool terminate(){
-            return reqTermination;
-        }
-
-    protected:
-        std::string stackTrace;
-        bool reqTermination = false;
-};
-
-#endif
-
 #ifndef PSE_PARSE_ERR
 #define PSE_PARSE_ERR
+#include <iostream>
+
+#include "liberrbasic.h"
 
 //TODO we should refine these a little
 //note that parsing errors should not use stackTraces
@@ -85,23 +41,6 @@ class InvalidString : public Throwable{
 class BadParanthesesNesting : public Throwable{
     public:
         BadParanthesesNesting(int line) : Throwable("BadParanthesesNesting: at line" + std::to_string(line), true){}
-};
-
-#endif
-
-#ifndef PSE_UTILS
-#define PSE_UTILS
-
-namespace pseutils{
-    void raise(Throwable &T){
-        std::cout << T.what() << '\n';
-
-        if (T.terminate()){
-            throw T;
-        }
-
-        return;
-    }
 };
 
 #endif
