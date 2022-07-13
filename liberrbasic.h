@@ -7,6 +7,11 @@
 #define PSE_ERR_BASIC
 #include <exception>
 
+#ifndef PSE_INTERNAL_STDIO
+#define PSE_INTERNAL_STDIO
+#include <iostream>
+#endif
+
 class Throwable : public std::exception{
     public:
         Throwable(std::string message, bool reqTermination) {

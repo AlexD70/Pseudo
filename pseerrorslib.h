@@ -9,8 +9,6 @@
 
 #ifndef PSE_PARSE_ERR
 #define PSE_PARSE_ERR
-#include <iostream>
-
 #include "liberrbasic.h"
 
 //TODO we should refine these a little

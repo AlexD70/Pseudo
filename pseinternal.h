@@ -15,6 +15,10 @@
 
 //error libs
 #include "internalerrlib.h"
+#include "pseerrorslib.h"
+
+//parsing libs
+#include "parsingflags.h"
 
 #ifndef PSE_TOKENS_BASIC
 #define PSE_TOKENS_BASIC
@@ -43,25 +47,25 @@ class Token {
 
     public:
         Token(){} //internal use only
-        Token(int line){ //internal use only
-            line = line;
+        Token(int _line){ //internal use only
+            line = _line;
         }
-        Token(int line, std::string repr){ //might delete later
-            line = line;
-            repr = repr;
+        Token(int _line, std::string _repr){ //might delete later
+            line = _line;
+            repr = _repr;
         }
-        Token(int line, const char* _repr){ //declaration w c-style strings, might delete this one
-            line = line;
+        Token(int _line, const char* _repr){ //declaration w c-style strings, might delete this one
+            line = _line;
             repr = std::string(_repr);
         }
-        Token(int line, const char* _repr, int flag){ //declaration w c-style strings
-            line = line;
+        Token(int _line, const char* _repr, int flag){ //declaration w c-style strings
+            line = _line;
             repr = std::string(_repr);
             wrapperFlag = flag;
         }
-        Token(int line, std::string repr, int flag){
-            line = line;
-            repr = repr;
+        Token(int _line, std::string _repr, int flag){
+            line = _line;
+            repr = _repr;
             wrapperFlag = flag;
         }
         
@@ -590,18 +594,10 @@ class Indentation : public Token {
     public:
     int depth = 0;
     
-    Indentation(int line, int depth) : Token(line){
-        depth = depth;
+    Indentation(int _line, int _depth) : Token(_line, "Indentation: depth " + std::to_string(_depth)){
+        depth = _depth;
     }
-    Indentation(int line, int depth, std::string repr) : Token(line, repr){
-        depth = depth;
-    }
-    Indentation(int line, int depth, const char* repr) : Token(line, repr){
-        depth = depth;
-    }
-    Indentation(int line) : Token(line){}
-    Indentation(int line, std::string repr) : Token(line, repr){}
-    Indentation(int line, const char* repr) : Token(line, repr){}
+    Indentation(int _line) : Token(_line, "Indentation: depth 0"){}
 };
 
 //TODO

@@ -1,15 +1,20 @@
-TODO: (the lower the nr the more importnant the task, try to appreciate the task yourself)
+TODO: 
+(the lower the nr the more importnant the task, try to appreciate the task yourself,
+ ~ prefix means in progress, @NAME prefix means help needed from NAME, ? value means cannot appreciate importance)
 
 [4] refactorings, if necessary
 [2] deprecations, if necessary
-[?] other TODO marked comments in files
-[?] other comments containing "note" or "maybe"
+@NumarImpar [?] other TODO marked comments in files
+@NumarImpar [?] other comments containing "note" or "maybe"
 
-[-1] debug and test the parser 
+~[-1] debug scope and indentation token creation
+@NumarImpar ~[-1] debug and test the parser 
+
 [3] improve dtypes::String
 [2] improve dtypes::Number, Integer and Float
 [2] implement large number handling logic
-[1] improve subscript and parantheses handling logic (maybe)
+@NumarImpar [1] improve subscript and parantheses handling logic (maybe)
+
 [1] write IntegerToString cast, write StringToInteger cast and other casts
 [1] implement casts inside pseinternal.h
 [0] build token wrapper and token types + errors + warnings
@@ -34,4 +39,5 @@ TIMELINE: (timeline was added on 12 july 2022 in development stage)
 [0] implemented subscript support in parser
 [0] implemented default case in parser
 [0] built the first version of the parser
+[-1] fixed a few bugs regarding scope and indentation
 ===========================================================

@@ -67,7 +67,7 @@ class PseudocodeParser {
 
         //the actual parsing function
         void parseFromBuffer(std::vector<char> buffer) {
-            resetFlags();
+            resetFlags(); //TODO updte this for newliy added flags
             std::string tokenString = "";
 
             // used for stange purposes
@@ -136,6 +136,7 @@ class PseudocodeParser {
                     if (!pflags::isTokenStringEmpty){
                         pflags::isTokenStringEmpty = true;
                         appendToStack(Token(pflags::line, tokenString), &tokenString);
+                        tokenString = "";
                     }
                     seek(&i, buffer);
                     continue;
@@ -394,6 +395,7 @@ class PseudocodeParser {
             if (!pflags::isTokenStringEmpty){
                 pflags::isTokenStringEmpty = true;
                 appendToStack(Token(pflags::line, (*tokenString)), tokenString);
+                (*tokenString) = "";
             }
             if (pflags::inSubscript) {
                 (*subscriptPtr).appendToken(what);
@@ -413,6 +415,10 @@ class PseudocodeParser {
                 }
 
                 peek(*i, buffer);
+                if ((pflags::sucessiveSpaces == 4) && (pflags::scopeChangeContext)) {
+                    pflags::scopeDepth += 1;
+                    pflags::sucessiveSpaces = 0;
+                }
 
                 if (peekData == ' ') {
                     *i += 1;
@@ -438,11 +444,6 @@ class PseudocodeParser {
                     pflags::sucessiveSpaces = 0;
                     return;
                 }
-
-                if ((pflags::sucessiveSpaces == 4) && (pflags::scopeChangeContext)) {
-                    pflags::scopeDepth += 1;
-                    pflags::sucessiveSpaces = 0;
-                }
             }
         }
 
@@ -460,7 +461,20 @@ class PseudocodeParser {
 //note 3: similar to $0 in bash, argv[0] is the name of the program that was invoked
 int main(/*int argc, char *argv[]*/)
 {
-    dtypes::Integer a = dtypes::Integer(5), b = dtypes::Integer(2);
+    PseudocodeParser parser = PseudocodeParser();
 
-    std::cout << ((-9) % 2) << '\n';
+    parser.readFile("/home/signora/Repos/Pseudo/test.txt");
+    // for (char c : parser.charBuffer) {
+    //     std::cout << c;
+    // }
+
+    // std::cout << '\n' << parser.charBuffer.size() << '\n' << '\n';
+
+    parser.parseFromBuffer();
+    
+    for (Token t : parser.tokenVector){
+        std::cout << t.__repr__() << '\n';
+    }
+
+    std::cout << '\n' << parser.tokenVector.size() << '\n';
 }

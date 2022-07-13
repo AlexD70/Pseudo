@@ -16,7 +16,7 @@
 // }
 
 template <class T> //commented the one above to prevent redefinition error
-void appendToVector(std::vector<T> vector, T what){
+void appendToVector(std::vector<T> &vector, T what){
     vector.reserve(vector.size() + 1);
     vector.push_back(what);
 
