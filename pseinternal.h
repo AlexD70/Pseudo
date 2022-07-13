@@ -779,6 +779,10 @@ class Subscript : public Token {
         }
 
         void exitParantheses(){
+            if (!inParantheses){
+                BadParanthesesNesting err = BadParanthesesNesting(pflags::line);
+                pseutils::raise(err);
+            }
             if ((*actualNode).back){
                 actualNode = (*actualNode).back;
             } else {
@@ -786,10 +790,30 @@ class Subscript : public Token {
             }
         }
 
-        void exitSubscript(){
-            inSubscript = false;
-            if (subscriptInParantheses){
-                inParantheses = true;
+        bool exitSubscript(){
+            if (inSubscript){
+                inSubscript = !(*subscriptPtr).exitSubscript();
+                if ((!inSubscript) && (subscriptInParantheses)){
+                    inParantheses = true;
+                }
+                return false;
+            } else {
+                exitThis();
+                return true;
+            }
+            
+        }
+
+        void exitThis(){
+            if (inParantheses){
+                BadParanthesesNesting err = BadParanthesesNesting(pflags::line);
+                pseutils::raise(err);
+
+            } else if (inSubscript){
+                BadSubscriptUsage err = BadSubscriptUsage(pflags::line);
+                pseutils::raise(err);
+            } else {
+                return; //dont call ~Subscript() yet
             }
         }
 

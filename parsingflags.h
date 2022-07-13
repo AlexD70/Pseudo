@@ -19,6 +19,9 @@ namespace pflags {
     int sucessiveSpaces = 0;
     int line = 1;
     bool inSubscript = false;
+    bool normalChar = false;
+    bool isTokenStringEmpty = true;
+    int tokenStringLine = 1;
 }
 
 #endif

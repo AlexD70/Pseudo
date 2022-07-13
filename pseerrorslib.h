@@ -40,7 +40,12 @@ class InvalidString : public Throwable{
 
 class BadParanthesesNesting : public Throwable{
     public:
-        BadParanthesesNesting(int line) : Throwable("BadParanthesesNesting: at line" + std::to_string(line), true){}
+        BadParanthesesNesting(int line) : Throwable("BadParanthesesNesting: at line " + std::to_string(line), true){}
+};
+
+class BadSubscriptUsage : public Throwable{
+    public:
+        BadSubscriptUsage(int line) : Throwable("BadSubscriptUsage: at line " + std::to_string(line), true){}
 };
 
 #endif

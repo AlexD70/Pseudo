@@ -120,9 +120,10 @@ class PseudocodeParser {
                     } else if (c == pflags::stringFlagsImpl.stringType) { //check for string end
                         pflags::stringFlagsImpl.inString = false;
                         pflags::scopeChangeContext = false;
-                        appendToParanthesesStack(Literal<dtypes::String, std::string>(dtypes::String(tokenString), pflags::line - otherData));
+                        appendToStack(Literal<dtypes::String, std::string>(dtypes::String(tokenString), pflags::line - otherData), &tokenString);
                         otherData = 0; //reset this for later use
                         pflags::scopeDepth = 0;
+                        tokenString = "";
 
                     } else { //default
                         tokenString = tokenString + c;
@@ -132,13 +133,17 @@ class PseudocodeParser {
                 if ((c == '\t') || (c == ' ') || (c == '\n')){ 
                     //seek until buffer[i] is not space, newline or tab
                     //this also takes care of flags
+                    if (!pflags::isTokenStringEmpty){
+                        pflags::isTokenStringEmpty = true;
+                        appendToStack(Token(pflags::line, tokenString), &tokenString);
+                    }
                     seek(&i, buffer);
                     continue;
                 }
                 
                 if (pflags::scopeChangeContext){ //performs this at the beginning of every line that has at least one token
                     //or at least this is the intended behavior
-                    appendToParanthesesStack(Indentation(pflags::line, pflags::scopeDepth));
+                    appendToStack(Indentation(pflags::line, pflags::scopeDepth), &tokenString);
                     pflags::scopeChangeContext = false;
                     pflags::scopeDepth = 0;
                 }
@@ -149,7 +154,7 @@ class PseudocodeParser {
                         i += 1;
                         do{
                             i += 1;
-                        } while ((i < buffer.size()) && (buffer[i] != '\n'));
+                        } while ((i < buffer.size()) && (buffer[i] != '\n'), &tokenString);
                         pflags::line += 1;
                         pflags::scopeChangeContext = true;
                     } else if (buffer[i + 1] == '*'){ // multi-line comment
@@ -169,14 +174,14 @@ class PseudocodeParser {
                         }
                     } else { // division
                         char arr[2] = {c, '\0'}; // builds a c-style null-terminated string
-                        appendToParanthesesStack(Token(pflags::line, arr, 1));
+                        appendToStack(Token(pflags::line, arr, 1), &tokenString);
                         continue;
                     }
                 }
 
                 if ((c == '+') || (c == '*') || (c == '%') || (c == '-')){ //addition, multiplication, modulus, subtraction
                     char arr[2] = {c, '\0'}; // builds a c-style null-terminated string
-                    appendToParanthesesStack(Token(pflags::line, arr, 1));
+                    appendToStack(Token(pflags::line, arr, 1), &tokenString);
                     continue;
                 }
 
@@ -184,16 +189,16 @@ class PseudocodeParser {
                     if (buffer[i + 1] == '-'){ // atttribution
                         i += 1;
                         char arr[3] = {'<', '-', '\0'};
-                        appendToParanthesesStack(Token(pflags::line, arr, 3));
+                        appendToStack(Token(pflags::line, arr, 3), &tokenString);
 
                     } else if (buffer[i + 1] == '=') {  // LTEQ
                         i += 1;
                         char arr[3] = {'<', '=', '\0'};
-                        appendToParanthesesStack(Token(pflags::line, arr, 4));
+                        appendToStack(Token(pflags::line, arr, 4), &tokenString);
 
                     } else { // LT
                         char arr[2] = {'<', '\0'};
-                        appendToParanthesesStack(Token(pflags::line, arr, 4));
+                        appendToStack(Token(pflags::line, arr, 4), &tokenString);
                     }
                     continue;
                 }
@@ -201,11 +206,11 @@ class PseudocodeParser {
                 if (c == '>'){ // GT, GTEQ
                     if (buffer[i + 1] == '='){  // GTEQ
                         char arr[3] = {'>', '=', '\0'};
-                        appendToParanthesesStack(Token(pflags::line, arr, 4));
+                        appendToStack(Token(pflags::line, arr, 4), &tokenString);
 
                     } else {  // GT
                         char arr[2] = {'>', '\0'};
-                        appendToParanthesesStack(Token(pflags::line, arr, 4));
+                        appendToStack(Token(pflags::line, arr, 4), &tokenString);
                     }
                     continue;
                 }
@@ -214,14 +219,14 @@ class PseudocodeParser {
                     i += 2;
                     if (buffer[i + 1] == '='){ // NOTEQ (NU=)
                         char arr[4] = {'N', 'U', '=', '\0'};
-                        appendToParanthesesStack(Token(pflags::line, arr, 4));
+                        appendToStack(Token(pflags::line, arr, 4), &tokenString);
                         continue;
                     } else if (buffer[i + 1] == ' '){ // NOT
                         //checks for ' ' cuz if smth is appended to NU directly it should be an indentifier
                         //rather than a logical operator
                         //this is subject to change tho
                         char arr[3] = {'N', 'U'};
-                        appendToParanthesesStack(Token(pflags::line, arr, 2));
+                        appendToStack(Token(pflags::line, arr, 2), &tokenString);
                         continue;
                     } else {
                         i -= 2;
@@ -232,7 +237,7 @@ class PseudocodeParser {
                     // performs the blank space check too (see NOT)
                     i += 2;
                     char arr[3] = {'S', 'I', '\0'};
-                    appendToParanthesesStack(Token(pflags::line, arr, 2));
+                    appendToStack(Token(pflags::line, arr, 2), &tokenString);
                     continue;
                 }
             
@@ -241,23 +246,23 @@ class PseudocodeParser {
                     // same as AND and NOT
                     i += 3;
                     char arr[4] = {'S', 'A', 'U', '\0'};
-                    appendToParanthesesStack(Token(pflags::line, arr, 2));
+                    appendToStack(Token(pflags::line, arr, 2), &tokenString);
                     continue;
                 }
             
                 if (c == '='){ // EQ
                     char arr[2] = {'=', '\0'};
-                    appendToParanthesesStack(Token(pflags::line, arr, 2));
+                    appendToStack(Token(pflags::line, arr, 2), &tokenString);
                     continue;
                 }
             
-                if ((c == '\"') || (c == '\'')){ // " or ' -> string start
+                if ((c == '\"') || (c == '\'')){ // " or ' => string start
                     pflags::stringFlagsImpl.inString = true;
                     pflags::stringFlagsImpl.stringType = c;
                     continue;
                 }
             
-                if (c == '('){
+                if (c == '('){ //start parantheses
                     //expect this to give SIGSEGV often
                     /*
                     i can almost picture it:
@@ -265,9 +270,14 @@ class PseudocodeParser {
                     */
                     pflags::paranthesesDepth += 1;
                     Parantheses newParantheses = Parantheses(pflags::line, pflags::paranthesesDepth);
-                    if (pflags::paranthesesDepth == 1){
+                    if (pflags::inSubscript){
+                        (*subscriptPtr).appendParantheses(newParantheses); 
+                        //as long as we handle the flags here, its internal logic should keep account of all stacks
+
+                    } else if (pflags::paranthesesDepth == 1){
                         node1.self = &newParantheses;
                         appendToVector<Token>(tokenVector, newParantheses);
+
                     } else {
                         //ahem a lot of pointers, im actually using a double-linked list
                         paranthesesStackNode node;
@@ -278,9 +288,10 @@ class PseudocodeParser {
                         actualNode = &node;
                         (*actualNode).back = lastNode;
                     }
+                    continue;
                 }
 
-                if (c == ')'){
+                if (c == ')'){ //exit parantheses
                     pflags::paranthesesDepth -= 1;
                     if (pflags::paranthesesDepth == 0){
                         continue;
@@ -289,12 +300,44 @@ class PseudocodeParser {
                         pseutils::raise(err);
                     }
 
-                    actualNode = (*actualNode).back;
+                    if (pflags::inSubscript){
+                        (*subscriptPtr).exitParantheses();
+                    } else {
+                        actualNode = (*actualNode).back;
+                    }
+                    continue;
                 }
 
-                
+                if (c == '['){ //start subscript
+                    Subscript newSubscript = Subscript(pflags::line);
+                    
+                    if (pflags::inSubscript){
+                        (*subscriptPtr).appendSubscript(newSubscript);
+                    } else {
+                        appendToStack(newSubscript, &tokenString);
+                        pflags::inSubscript = true;
+                    }
+                    continue;
+                }
+
+                if(c == ']'){ //exit subscript
+                    if (pflags::inSubscript){
+                        pflags::inSubscript = !(*subscriptPtr).exitSubscript();
+                    } else {
+                        BadSubscriptUsage err = BadSubscriptUsage(pflags::line);
+                        pseutils::raise(err);
+                    }
+                    continue;
+                }
+
+                //default
+                {
+                    tokenString = tokenString + c;
+                    pflags::isTokenStringEmpty = false;
+                }
+
                 //TODO debug this shit
-                //CHARACTERS LEFT: [], f (f-strings, if we decide to implement them + changes in string path)
+                //CHARACTERS LEFT: f (f-strings, IF WE DECIDE TO IMPLEMENT them => changes in string path)
                 //                 default (we shouldnt check for numbers at this level and pass that to the token wrapper)
 
                 //TODO this should be even more modularized, so that we use as little code here as possible
@@ -304,6 +347,11 @@ class PseudocodeParser {
             if (pflags::paranthesesDepth > 0){
                 UnexpectedEOF err = UnexpectedEOF("UnexpextedEOF: raised while parsing due to opened but not closed parantheses.");
                 pseutils::raise(err);
+            }
+        
+            if (!pflags::isTokenStringEmpty){
+                pflags::isTokenStringEmpty = true;
+                appendToStack(Token(pflags::line, tokenString), &tokenString);
             }
         }
 
@@ -340,8 +388,16 @@ class PseudocodeParser {
         }
 
         //appending to parantheses stack if that is the case
-        void appendToParanthesesStack(Token what){
-            if (pflags::paranthesesDepth > 0){
+        //kind of crazy logic with that pointer to the tokenString
+        //maybe find a better solution to handle it
+        void appendToStack(Token what, std::string *tokenString){ //subscripts have priority
+            if (!pflags::isTokenStringEmpty){
+                pflags::isTokenStringEmpty = true;
+                appendToStack(Token(pflags::line, (*tokenString)), tokenString);
+            }
+            if (pflags::inSubscript) {
+                (*subscriptPtr).appendToken(what);
+            } else if (pflags::paranthesesDepth > 0){
                 (*(*actualNode).self).appendToVector(what);
             } else {
                 appendToVector<Token>(tokenVector, what);
