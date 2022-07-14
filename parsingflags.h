@@ -13,15 +13,13 @@ namespace pflags {
     stringFlags stringFlagsImpl;
 
     //used to track whether 4 spaces change scope or not in teh actual context
-    bool scopeChangeContext = false;
+    bool scopeChangeContext = true;
     int paranthesesDepth = 0;
     int scopeDepth = 0;
     int sucessiveSpaces = 0;
     int line = 1;
     bool inSubscript = false;
-    bool normalChar = false;
     bool isTokenStringEmpty = true;
-    int tokenStringLine = 1;
 }
 
 #endif

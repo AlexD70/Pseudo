@@ -36,9 +36,9 @@ class PseudocodeParser {
             paranthesesStackNode *next = nullptr;
             paranthesesStackNode *back = nullptr;
         };
-        paranthesesStackNode node1 = paranthesesStackNode();
-        paranthesesStackNode *actualNode = &node1;
-        Subscript *subscriptPtr = nullptr;
+        paranthesesStackNode node1;
+        paranthesesStackNode *actualNode;
+        Subscript *subscriptPtr;
 
         //saves file contents into charBuffer
         void readFile(std::string filename) {
@@ -128,6 +128,7 @@ class PseudocodeParser {
                     } else { //default
                         tokenString = tokenString + c;
                     }
+                    continue;
                 }
 
                 if ((c == '\t') || (c == ' ') || (c == '\n')){ 
@@ -338,7 +339,7 @@ class PseudocodeParser {
                 }
 
                 //TODO debug this shit
-                //CHARACTERS LEFT: f (f-strings, IF WE DECIDE TO IMPLEMENT them => changes in string path)
+                //CHARACTERS LEFT: [,] -- i forgot abt it, f (f-strings, IF WE DECIDE TO IMPLEMENT them => changes in string path)
                 //                 default (we shouldnt check for numbers at this level and pass that to the token wrapper)
 
                 //TODO this should be even more modularized, so that we use as little code here as possible
@@ -363,10 +364,15 @@ class PseudocodeParser {
         void resetFlags(){
             pflags::line = 1;
             pflags::paranthesesDepth = 0;
-            pflags::scopeChangeContext = false;
+            pflags::scopeChangeContext = true;
             pflags::scopeDepth = 0;
             pflags::stringFlagsImpl.inString = false;
             pflags::sucessiveSpaces = 0;
+            pflags::inSubscript = false;
+            pflags::isTokenStringEmpty = true;
+            node1 = paranthesesStackNode();
+            actualNode = &node1;
+            subscriptPtr = nullptr;
 
             return;
         }
@@ -409,6 +415,19 @@ class PseudocodeParser {
         // increments i until buffer[i] is not space, tab or newline
         // also changes flags accordingly (at least thats what i expect)
         void seek(int *i, std::vector<char> buffer) {
+            if (buffer[*i] == '\n'){
+                pflags::scopeDepth = 0;
+                pflags::line += 1;
+                pflags::sucessiveSpaces = 0;
+                pflags::scopeChangeContext = true;
+            } else if (buffer[*i] == '\t'){
+                if (pflags::scopeChangeContext){
+                    pflags::scopeDepth += 1;
+                }
+            } else {
+                pflags::sucessiveSpaces += 1;
+            }
+
             while (true) {
                 if (*i >= buffer.size()){
                     return;
@@ -473,7 +492,7 @@ int main(/*int argc, char *argv[]*/)
     parser.parseFromBuffer();
     
     for (Token t : parser.tokenVector){
-        std::cout << t.__repr__() << '\n';
+        std::cout << t.getLine() << ' ' << t.__repr__() << ' ' << t.__repr__().size() << '\n';
     }
 
     std::cout << '\n' << parser.tokenVector.size() << '\n';

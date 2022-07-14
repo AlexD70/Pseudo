@@ -1,0 +1,86 @@
+BASIC TODO SYNTAX:
+
+[i] text
+
+//i is an integer denoting the importanc of the task
+//the LOWER i is the MORE IMPORTANT the task
+//if i is ?, it means the task cant be appreciated
+//=================================================
+"~" PREFIX:
+
+~[i] todo
+
+//the ~ prefix means task already started
+//=================================================
+TAGS:
+
+//you can tag a contribuitor by prefixing the task with: @NAME
+
+@NAME [i] task
+
+//this prefix must always be first
+//=================================================
+GROUPING:
+
+//tasks can be part of a group
+//groups are large tasks prefixed with GROUP#GROUPNAME
+
+GROUP#MYGROUP[i] group task
+
+//tasks that are part of the group must be prefixed with #GROUPNAME
+
+#GROUPNAME[i] task 1
+#GROUPNAME[i] task 2
+#GROUPNAME[i] task 3
+
+//the #GROUPNAME and GROUP#GROUPNAME prefixes must always be the last prefixes
+//===================================================
+COMMENTING:
+
+//to leave a comment on a task use ^// on the line immediately under the task
+
+[i] task
+^// comment on the task above
+
+//===================================================
+LARGE TASKS:
+
+//some tasks are larger goals but cant be split into smaller tasks yet
+//prefix those with a capital l (L)
+
+L[i] large task
+
+//not that a task prefixed with GROUP#GROUPNAME shouldnt be prefixed with L 
+//being a group task means its a large task by definition
+//nor should those prefixed with #GROUP since being part of a group means it is a small task
+// ~ has higher precedence than L 
+
+~ L[i] task
+//=====================================================
+QUESTIONS:
+
+//questions are marked with () insetad of []
+//they shouldnt be prefixed with L, ~ or GROUP#GROUPNAME
+
+(i) question
+
+//they can be prefixed with @NAME and #GROUPNAME
+
+@sb #MYGROUP(i) some question
+//======================================================
+PROBLEMS/BUGS:
+
+//use {} instead of []
+//replace i with a string made like this:
+// SEVERITY-ID
+// SEVERITY is from 0 to 10, 0 being the most severe
+// ID is a 3 digit int
+
+{10-001} bug
+//=======================================================
+MULTILINE:
+//use |
+
+[i] task: line 1
+  | line 2
+  | line 3

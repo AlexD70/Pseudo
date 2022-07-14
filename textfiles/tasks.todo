@@ -1,43 +1,34 @@
-TODO: 
-(the lower the nr the more importnant the task, try to appreciate the task yourself,
- ~ prefix means in progress, @NAME prefix means help needed from NAME, ? value means cannot appreciate importance)
+TODO:
+
+{0-001} all subclasses of Token are automatically casted to the superclass
+      | therefore losing all of their subclass attributes and functions
+      | and no they cant be casted back unless we define a cast ourselves
+      | DATE: 15 July 2022 (BUG 001) 
 
 [4] refactorings, if necessary
 [2] deprecations, if necessary
 @NumarImpar [?] other TODO marked comments in files
 @NumarImpar [?] other comments containing "note" or "maybe"
 
-~[-1] debug scope and indentation token creation
-@NumarImpar ~[-1] debug and test the parser 
+L[-2] simplify the () and [] handling logic
+[-2] implement , (literal colon) handling logic
+
+~ #PARSERDBG[-1] debug +, -, /, *, % token creation
+^// these seem in order but i wont mark them complete until i run more test w more token combinations
+
+#PARSERDBG[-1] debug string token creation
+#PARSERDBG[-1] debug NU, SI, SAU token creation
+#PARSERDBG[-1] debug <, >, <=, >=, <- token creation
+#PARSERDBG[-1] debug =, NU= token creation
+#PARSERDBG[-1] debug comments
+@NumarImpar ~ GROUP#PARSERDBG[-1] debug and test the parser 
 
 [3] improve dtypes::String
 [2] improve dtypes::Number, Integer and Float
-[2] implement large number handling logic
-@NumarImpar [1] improve subscript and parantheses handling logic (maybe)
 
-[1] write IntegerToString cast, write StringToInteger cast and other casts
-[1] implement casts inside pseinternal.h
-[0] build token wrapper and token types + errors + warnings
-[0] build context validator and dtypes + errors + warnings
+L[2] implement large number handling logic
 
-===========================================================
-
-TIMELINE: (timeline was added on 12 july 2022 in development stage)
-
-[2020][development stage]
-
-[12 july] =================================================
-[0] fixed Literal
-[0] implemented parantheses stack
-[4] refactorings
-[2] deprecations
-[4] organized imports to remove #pragma once preprocessor directive
-[3] added InternalError
-[0] added a super crazy subscript internal logic
-===========================================================
-[13 july] =================================================
-[0] implemented subscript support in parser
-[0] implemented default case in parser
-[0] built the first version of the parser
-[-1] fixed a few bugs regarding scope and indentation
-===========================================================
+L[1] write IntegerToString cast, write StringToInteger cast and other casts
+L[1] implement casts inside pseinternal.h
+L[0] build token wrapper and token types + errors + warnings
+L[0] build context validator and dtypes + errors + warnings

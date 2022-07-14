@@ -72,6 +72,10 @@ class Token {
         std::string __repr__(){ //get string representation
             return repr;
         }
+
+        int getLine(){
+            return line;
+        }
 };
 
 #endif
@@ -654,12 +658,14 @@ class Literal : public Token {
         T self;
 
     public:
-        Literal(T self, int line) : Token(line){
-            self = self;
+        Literal(T _self, int _line) : Token(_line){
+            self = _self;
             repr = self.getVal();
+            Token::repr = self.__repr__();
         }
 
-        P __repr__(){
+        //just naming it __repr__ does not help
+        P __reprOverride__(){
             return repr;
         }
 
