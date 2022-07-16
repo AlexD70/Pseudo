@@ -1,4 +1,7 @@
+#
+
 .vscode/
+build/
 parser
 !parser.cpp
 test.txt

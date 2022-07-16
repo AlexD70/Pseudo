@@ -140,7 +140,7 @@ namespace dtypes{ // data types
                 }
 
                 return result;
-            };
+            }
 
             //get sign of a numeric dtype instance
             //returns 2 for NaN, 1 for +, -1 for - and 0 for 0

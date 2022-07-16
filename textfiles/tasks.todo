@@ -5,6 +5,9 @@ TODO:
       | and no they cant be casted back unless we define a cast ourselves
       | DATE: 15 July 2022 (BUG 001) 
 
+[-2] possible fix to BUG 001: implement unique_ptr usage: std::vector<std::unique_ptr<Token>> tokenVector
+^// shared_ptr can be an alternative to unique_ptr
+
 [4] refactorings, if necessary
 [2] deprecations, if necessary
 @NumarImpar [?] other TODO marked comments in files
