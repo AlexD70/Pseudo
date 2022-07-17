@@ -1,0 +1,34 @@
+//this will contain the base class for all tokens
+//do not create instances of this
+
+#ifndef PSE_INTERNAL_STR
+#define PSE_INTERNAL_STR
+#include <string>
+#endif
+
+#include "dtype.h"
+
+#ifndef PSE_TOKENS_BASIC
+#define PSE_TOKENS_BASIC
+
+template <class T>
+class Token {
+    protected:
+        std::string repr;
+        int line;
+        int wrapperFlag;
+        T linkedDtype;
+
+    public:
+        Token(){}
+        Token(std::string _repr, int _line){
+            repr = _repr;
+            line = _line;
+        }
+        ~Token(){}
+        virtual std::string __repr__() = 0;
+        virtual int __line__() = 0;
+        virtual T __self__() = 0;
+};
+
+#endif

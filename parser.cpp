@@ -595,20 +595,9 @@ int main(/*int argc, char *argv[]*/)
 {
     PseudocodeParser parser = PseudocodeParser();
 
-    parser.readFile("/home/signora/Repos/Pseudo/test.txt");
-    // for (char c : parser.charBuffer) {
-    //     std::cout << c;
-    // }
+    parser.tokenPtrVector.reserve(3);
+    parser.tokenPtrVector.push_back(std::unique_ptr<Indentation>(new Indentation(3, 2)));
+    parser.tokenPtrVector.push_back(std::unique_ptr<Literal<dtypes::String, std::string>>(new Literal<dtypes::String, std::string>(dtypes::String("Hello"), 3)));
 
-    // std::cout << '\n' << parser.charBuffer.size() << '\n' << '\n';
-
-    parser.parseFromBuffer();
-
-    for (Token t : parser.tokenVector)
-    {
-        std::cout << t.getLine() << ' ' << t.__repr__() << ' ' << t.__repr__().size() << '\n';
-    }
-
-    std::cout << '\n'
-              << parser.tokenVector.size() << '\n';
+    // std::cout << dynamic_cast<Indentation*>(parser.tokenPtrVector[0].get()).depth;
 }

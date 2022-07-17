@@ -661,11 +661,10 @@ class Literal : public Token {
         Literal(T _self, int _line) : Token(_line){
             self = _self;
             repr = self.getVal();
-            Token::repr = self.__repr__();
         }
 
         //just naming it __repr__ does not help
-        P __reprOverride__(){
+        P __repr__(){
             return repr;
         }
 
