@@ -6,7 +6,10 @@
 #ifndef PSE_INDENTATION
 #define PSE_INDENTATION
 
-class Indentation : public Token<None>{
+class Indentation : virtual public Token<None>{
+    protected:
+        ~Indentation() override = default;
+
     public:
         int depth;
 
@@ -14,16 +17,6 @@ class Indentation : public Token<None>{
         Token("Indentation: depth " + std::to_string(_depth), _line){
             depth = _depth;
             linkedDtype = None();
-        }
-
-        std::string __repr__() override{
-            return repr;
-        }
-        int __line__() override{
-            return line;
-        }
-        None __self__() override{
-            return linkedDtype;
         }
 };
 

@@ -1,7 +1,9 @@
-#
-
+docs/.~lock.PseudoMath.ods#
 .vscode/
 build/
 parser
 !parser.cpp
 test.txt
+rework/test
+!rework/test.cpp
+!rework/literal.h

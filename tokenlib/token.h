@@ -18,6 +18,7 @@ class Token {
         int line;
         int wrapperFlag;
         T linkedDtype;
+        virtual ~Token() = 0;
 
     public:
         Token(){}
@@ -25,10 +26,15 @@ class Token {
             repr = _repr;
             line = _line;
         }
-        ~Token(){}
-        virtual std::string __repr__() = 0;
-        virtual int __line__() = 0;
-        virtual T __self__() = 0;
+        std::string __repr__(){
+            return repr;
+        };
+        int __line__(){
+            return line;
+        };
+        T __self__(){
+            return linkedDtype;
+        };
 };
 
 #endif

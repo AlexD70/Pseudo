@@ -10,18 +10,14 @@
 #ifndef PSE_NONE
 #define PSE_NONE
 
-class None : public Dtype<unsigned char>{
+class None : virtual public Dtype<unsigned char>{
     public:
         None() : Dtype(){
             repr = "None";
+            val = 0;
         }
+        ~None() override = default;
 
-        std::string __repr__() override{
-            return repr;
-        }
-        unsigned char __val__() override{
-            return 0;
-        }
         bool isNone() override{
             return true;
         }

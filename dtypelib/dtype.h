@@ -14,10 +14,11 @@ class Dtype {
     protected:
         T val;
         std::string repr;
+        virtual ~Dtype() = 0;
 
     public:
         Dtype(){}
-        ~Dtype(){}
+        
         std::string __repr__(){
             return repr;
         }

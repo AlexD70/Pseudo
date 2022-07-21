@@ -7,37 +7,38 @@
 #define PSE_NUMBER
 
 template <class T, class S>
-class Number : public Dtype<T>{
+class Number : virtual public Dtype<T>{
     protected:
         bool isNaN, isInf, isMinusInf;
 
-        void setFlags(bool nan = false, bool inf = false, bool minusinf = false){
+        void setFlags(bool nan = false, bool inf = false, bool minusinf = false) const noexcept{
             isNaN = nan;
             isInf = inf;
             isMinusInf = minusinf;
         }
 
     public:
-        Number() : Dtype(){}
+        Number(){};
+        virtual ~Number() override = default;
 
         bool isNone() override{
             return false;
         }
-        bool isZero(){
+        bool isZero() const noexcept{
             return (val == 0);
         }
 
-        bool __nan__(){
+        bool __nan__() const noexcept{
             return isNaN;
         }
-        bool __inf__(){
+        bool __inf__() const noexcept{
             return isInf;
         }
 
-        virtual bool __minusinf__(){
+        virtual bool __minusinf__() const noexcept{
             return isMinusInf;
         }
-        virtual int sign(){
+        virtual int sign() noexcept{
             if (isNaN){
                 return 2;
             }
@@ -47,7 +48,17 @@ class Number : public Dtype<T>{
         virtual S* add(S &other) = 0;
         virtual S* sub(S &other) = 0;
         virtual S* mlt(S &other) = 0;
+        virtual S* div(S &other) = 0;
         virtual S* pow(S &other) = 0;
+
+        virtual S* mod(S &other){
+            return nullptr;
+        }
+        virtual void changeSign(){}
+        virtual void abs(){}
+        virtual S* sqrt(){
+            return nullptr;
+        }
 };
 
 #endif
