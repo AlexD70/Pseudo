@@ -13,6 +13,11 @@ class Widen : public Narrow{
         Widen(Wide &_wider){
             wider = _wider;
         }
+
+        Widen(int operation, uint32_t _val1, uint32_t _val2){
+            wider = &Wide();
+            wider.wrap();
+        }
         Widen(){}
         ~Widen(){}
 

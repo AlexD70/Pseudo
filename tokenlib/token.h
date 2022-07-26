@@ -32,8 +32,8 @@ class Token {
         int __line__(){
             return line;
         };
-        T __self__(){
-            return linkedDtype;
+        T* __self__(){
+            return &linkedDtype;
         };
 };
 

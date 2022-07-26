@@ -11,7 +11,7 @@ class Number : virtual public Dtype<T>{
     protected:
         bool isNaN, isInf, isMinusInf;
 
-        void setFlags(bool nan = false, bool inf = false, bool minusinf = false) const noexcept{
+        void setFlags(bool nan = false, bool inf = false, bool minusinf = false) noexcept{
             isNaN = nan;
             isInf = inf;
             isMinusInf = minusinf;
@@ -21,10 +21,12 @@ class Number : virtual public Dtype<T>{
         Number(){};
         virtual ~Number() override = default;
 
-        bool isNone() override{
+        virtual void wrap(int a, uint32_t b, uint32_t c) {}
+
+        bool isNone() override {
             return false;
         }
-        bool isZero() const noexcept{
+        virtual bool isZero() const noexcept {
             return (val == 0);
         }
 

@@ -7,9 +7,6 @@
 #define PSE_TOKEN_IMPL
 
 class TokenImpl : virtual public Token<None> {
-    protected:
-        ~TokenImpl() override = default;
-
     public:
         TokenImpl(std::string _repr, int _line) : Token(_repr, _line){
             linkedDtype = None();
@@ -17,6 +14,7 @@ class TokenImpl : virtual public Token<None> {
         TokenImpl(const char* _repr, int _line) : Token(_repr, _line){
             linkedDtype = None();
         }
+        ~TokenImpl() override = default;
 };
 
 #endif

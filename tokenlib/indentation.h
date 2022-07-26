@@ -7,9 +7,6 @@
 #define PSE_INDENTATION
 
 class Indentation : virtual public Token<None>{
-    protected:
-        ~Indentation() override = default;
-
     public:
         int depth;
 
@@ -18,6 +15,7 @@ class Indentation : virtual public Token<None>{
             depth = _depth;
             linkedDtype = None();
         }
+        ~Indentation() override = default;
 };
 
 #endif
