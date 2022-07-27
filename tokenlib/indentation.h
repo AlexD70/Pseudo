@@ -1,7 +1,7 @@
-//this contains the Indentation token derived from Token
+//this contains the Indentation class derived from Token
 
 #include "token.h"
-#include "none.h"
+#include "../dtypelib/none.h"
 
 #ifndef PSE_INDENTATION
 #define PSE_INDENTATION

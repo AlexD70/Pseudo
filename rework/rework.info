@@ -1,7 +1,0 @@
-so, um this rework is just pseinternal.h but improved to implement abstraction and polymorphism properly
-if it works and tokens can be stored proeprly, ill implement its usage in the parser itself
-additionaly, ill do a rework of data types cuz they have a pretty crazy logic rn
-
-send help
-
-this is also a good opportunity to implement casts

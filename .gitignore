@@ -4,6 +4,6 @@ build/
 parser
 !parser.cpp
 test.txt
-rework/test
-!rework/test.cpp
+test
+test.cpp
 !rework/literal.h
