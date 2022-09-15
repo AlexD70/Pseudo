@@ -23,23 +23,6 @@ class Expect {
         }
 };
 
-class Expression {
-    public:
-        CTYPE evalTo;
-        std::vector<Token>::iterator iter;
-        int i;
-        size_t max_i = 0;
-
-        Expression(std::vector<Token>::iterator _iter, size_t _max_i){
-            iter = _iter;
-            max_i = _max_i;
-        }
-
-        void deductEvalAndLength(){
-
-        }
-};
-
 namespace ctxflags {
     std::size_t line = 1, col = 0;
     int scopeDepth = 0, paranthesesDepth = 0;
@@ -57,6 +40,19 @@ namespace ctxflags {
         lastIndentation = nullptr;
     }
 };
+
+class Expression{
+    public:
+        CTYPE evalTo;
+        std::vector<Token>::iterator iter;
+        int i;
+        size_t max_i = 0;
+
+        Expression(std::vector<Token>::iterator _iter, size_t _max_i){
+            iter = _iter;
+            max_i = _max_i;
+        }
+}
 
 class Symbol {
     public:
@@ -110,6 +106,25 @@ class SymbolManager {
         }
 };
 
+class Expression {
+    public:
+
+        bool deductEvalAndLength(){
+            bool inExpression = true, unresolved = false, sameType = true, typeCastPossible = false;
+
+            while (inExpression){
+
+                if ((i > max_i) || (unresolved) || ((!sameType) && (!typeCastPossible))){
+                    inExpression = false;
+                }
+            }
+            //TODO match symbols
+            //TODO eval literals
+            //TODO eval built in functions
+            //TODO eval operators
+        }
+};
+
 
 class Symbol {
     public:
@@ -125,6 +140,17 @@ class Symbol {
 
         bool operator==(Symbol & _other) noexcept {
             return ((* token).perfectMatch(_other.token));
+        }
+
+        bool dtypeMatchesCtype(DTYPE _dtype, CTYPE _ctype){
+            if (((_dtype == DTYPE::INT) && (_ctype == CTYPE::_int)) ||
+                ((_dtype == DTYPE::DOUBLE) && (_ctype == CTYPE::_dbl)) ||
+                ((_dtype == DTYPE::STRING) && (_ctype == CTYPE::_str))
+            ){
+                return true;
+            } else {
+                return false;
+            }
         }
 
         Symbol(Token * _token, DTYPE _dtype) noexcept {
@@ -154,7 +180,7 @@ class Symbol {
             dtype = _dtype;
             isInput = _isInput;
         }
-        Symbol autodeductSymbolInitval(Token * _token, DTYPE _dtype, SymbolManager * _symmanager, Token * rvalue){
+        Symbol autodeductSymbolInitval(Token * _token, DTYPE _dtype, SymbolManager * _symmanager, Token * rvalue, std::vector<Token>::iterator iter, int tokensOnLine){
             token = _token;
             dtype = _dtype;
             if ((* rvalue).type == TYPE::LITERAL){
@@ -167,12 +193,18 @@ class Symbol {
                     //TODO raise type error
                 }
             }
-            Symbol * _symbol = (* _symmanager).findMatch(rvalue);
+            Expression _expr = Expression(iter, tokensOnLine);
 
-            if (_symbol){
-
+            if (_expr.deductEvalAndLength()){
+                if (dtypeMatchesCtype(_dtype, _expr.CTYPE)){
+                    //TODO check if expr is constexpr
+                    //TODO check if expr is Input/ is Input dependent
+                    //TODO create symbols
+                } else {
+                    //TODO raise type error
+                }
             } else {
-                //TODO raise symbol or expression expected
+                //TODO raise expression expected error
             }
         }
 };
@@ -217,9 +249,21 @@ class ContextValidator {
             }
         }
 
+        int countTillLineEnd(std::vector<Token>::iterator iter){
+            int i = 0;
+
+            while(ctxflags::line == (* iter).line){
+                i += 1;
+                iter += 1;
+            }
+
+            return i;
+        }
+
     public:
         void copyTokenVector(PseudocodeParser & _parser){
             tokenVector = _parser.getTokenVectorCopy();
+
         }
 
         void validateContext() {
