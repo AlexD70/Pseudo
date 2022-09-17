@@ -56,6 +56,8 @@ class Expression{
 
 class Symbol {
     public:
+        int inputID = -1;
+
         Symbol(){}
         bool operator==(Symbol & _other){
             return true;
@@ -71,6 +73,15 @@ class SymbolManager {
         std::vector<Symbol> symbolVector;
 
         SymbolManager(){}
+        Symbol * findSymbolbyInputID(int _id) noexcept {
+            for (int i = 0; i < symbolVector.size(); i ++){
+                if (symbolVector[i].inputID == _id){
+                    return (& symbolVector[i]);
+                }
+            }
+            return nullptr;
+        } 
+
         Symbol * findMatch(Symbol & _symbol) noexcept {
             for (int i = 0; i < symbolVector.size(); i ++){
                 if (symbolVector[i] == _symbol){
@@ -118,6 +129,8 @@ class Expression {
                     inExpression = false;
                 }
             }
+
+
             //TODO match symbols
             //TODO eval literals
             //TODO eval built in functions
@@ -132,6 +145,8 @@ class Symbol {
         bool hasValue = false;
         bool isConst = true;
         bool isInput = false;
+
+        static int globalInputID = -1;
         DTYPE dtype;
 
         bool operator==(Token * _other) noexcept {
@@ -152,6 +167,8 @@ class Symbol {
                 return false;
             }
         }
+
+        void newInputID() noexcept {inputID = globalInputID + 1;}
 
         Symbol(Token * _token, DTYPE _dtype) noexcept {
             token = _token;
@@ -179,6 +196,7 @@ class Symbol {
             token = _token;
             dtype = _dtype;
             isInput = _isInput;
+            newInputID();
         }
         Symbol autodeductSymbolInitval(Token * _token, DTYPE _dtype, SymbolManager * _symmanager, Token * rvalue, std::vector<Token>::iterator iter, int tokensOnLine){
             token = _token;
